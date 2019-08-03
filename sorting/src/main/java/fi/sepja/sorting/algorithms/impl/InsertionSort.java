@@ -1,15 +1,18 @@
-package fi.sepja.sorting.algorithms;
+package fi.sepja.sorting.algorithms.impl;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import fi.sepja.sorting.algorithms.AbstractAlgorithm;
+import fi.sepja.sorting.algorithms.Algorithm;
+
 public class InsertionSort extends AbstractAlgorithm {
 
-	protected InsertionSort() {
+	InsertionSort() {
 		super();
 	}
 
-	public InsertionSort(int comparisonSleepMicros, int swapSleepMicros) {
+	private InsertionSort(int comparisonSleepMicros, int swapSleepMicros) {
 		super(comparisonSleepMicros, swapSleepMicros);
 	}
 

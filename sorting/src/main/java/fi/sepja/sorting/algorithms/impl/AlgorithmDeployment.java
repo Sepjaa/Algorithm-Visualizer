@@ -1,4 +1,4 @@
-package fi.sepja.sorting.algorithms;
+package fi.sepja.sorting.algorithms.impl;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -6,6 +6,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import fi.sepja.sorting.algorithms.Algorithm;
 import fi.sepja.sorting.algorithms.Algorithm.AlgorithmType;
 
 /**
@@ -37,6 +38,9 @@ public class AlgorithmDeployment {
 		switch (type) {
 		case INSERTION_SORT: {
 			return new InsertionSort();
+		}
+		case COCKTAIL_SHAKER_SORT: {
+			return new CocktailShakerSort();
 		}
 		}
 		LOG.error("Add implementation for {}", type);

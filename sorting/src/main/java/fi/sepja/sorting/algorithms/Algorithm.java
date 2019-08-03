@@ -1,5 +1,7 @@
 package fi.sepja.sorting.algorithms;
 
+import fi.sepja.sorting.algorithms.impl.AlgorithmDeployment;
+
 /**
  * Interface to access algorithm functions.
  *
@@ -32,13 +34,13 @@ public interface Algorithm {
 	 * Enum containing all the available algorithm types. Algorithms can be added by
 	 * adding values to this and providing an implementation for them in
 	 * {@link AlgorithmDeployment}.
-	 * 
+	 *
 	 * @author Jaakko
 	 *
 	 */
 	public enum AlgorithmType {
 
-		INSERTION_SORT("Insertion Sort");
+		INSERTION_SORT("Insertion Sort"), COCKTAIL_SHAKER_SORT("Cocktail Shaker Sort");
 
 		private String value;
 

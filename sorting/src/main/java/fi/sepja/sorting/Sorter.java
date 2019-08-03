@@ -18,8 +18,8 @@ import fi.sepja.sorting.algorithms.Algorithm;
  */
 public class Sorter {
 	public static int DEFAULT_ELEMENT_AMOUNT = 100;
-	public static int DEFAULT_COMPARISON_SLEEP = 10000;
-	public static int DEFAULT_SWAP_SLEEP = 10001;
+	public static int DEFAULT_COMPARISON_SLEEP = 1000;
+	public static int DEFAULT_SWAP_SLEEP = 1000;
 	private static final Logger LOG = LoggerFactory.getLogger(Sorter.class);
 	private final Random random = new Random();
 

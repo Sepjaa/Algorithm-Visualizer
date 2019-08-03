@@ -18,7 +18,7 @@ import com.jogamp.opengl.util.FPSAnimator;
 
 import fi.sepja.sorting.algorithms.Algorithm;
 import fi.sepja.sorting.algorithms.Algorithm.AlgorithmType;
-import fi.sepja.sorting.algorithms.AlgorithmDeployment;
+import fi.sepja.sorting.algorithms.impl.AlgorithmDeployment;
 import net.miginfocom.swing.MigLayout;
 
 /**
@@ -80,7 +80,7 @@ public class MainWindow extends JFrame {
 		config.add(comparisonSleep, "cell 1 3");
 
 		config.add(new JLabel("Swap"), "cell 0 4");
-		swapSleep = new JTextField(String.valueOf(Sorter.DEFAULT_COMPARISON_SLEEP));
+		swapSleep = new JTextField(String.valueOf(Sorter.DEFAULT_SWAP_SLEEP));
 		swapSleep.setPreferredSize(new Dimension((int) 100, elements.getHeight()));
 		config.add(swapSleep, "cell 1 4");
 
@@ -131,7 +131,7 @@ public class MainWindow extends JFrame {
 	}
 
 	private Algorithm getAlgorithm() {
-		AlgorithmType type = AlgorithmType.INSERTION_SORT;
+		AlgorithmType type = (AlgorithmType) algorithm.getSelectedItem();
 		return AlgorithmDeployment.getImplementationFor(type).setDelays(getCompareSleep(), getSwapSleep());
 	}
 
