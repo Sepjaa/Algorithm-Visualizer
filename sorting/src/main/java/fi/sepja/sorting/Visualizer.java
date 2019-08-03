@@ -18,6 +18,10 @@ import com.jogamp.opengl.awt.GLCanvas;
  */
 public class Visualizer extends GLCanvas implements GLEventListener {
 
+	/**
+	 *
+	 */
+	private static final long serialVersionUID = 6146921870949093036L;
 	private Object arrayLock = new Object();
 	private short[] array;
 

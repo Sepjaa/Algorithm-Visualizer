@@ -1,10 +1,10 @@
 package fi.sepja.sorting;
 
-import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.FlowLayout;
 
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -16,11 +16,14 @@ import org.slf4j.LoggerFactory;
 
 import com.jogamp.opengl.util.FPSAnimator;
 
-import fi.sepja.sorting.algorithms.InsertionSort;
+import fi.sepja.sorting.algorithms.Algorithm;
+import fi.sepja.sorting.algorithms.Algorithm.AlgorithmType;
+import fi.sepja.sorting.algorithms.AlgorithmDeployment;
+import net.miginfocom.swing.MigLayout;
 
 /**
  * Mainwindow and controller for the application.
- * 
+ *
  * @author Jaakko
  *
  */
@@ -31,57 +34,73 @@ public class MainWindow extends JFrame {
 	 */
 	private static final long serialVersionUID = 5118488474777349693L;
 	private static String TITLE = "Sorting Visualizer";
-	private static final int CANVAS_WIDTH = 1000;
-	private static final int CANVAS_HEIGHT = 800;
+	private static final int CANVAS_WIDTH = 600;
+	private static final int CANVAS_HEIGHT = 400;
 	private static final int FPS = 144;
 
 	private final Visualizer visualizer;
-	private final JTextField elements;
+	private final JTextField elements, comparisonSleep, swapSleep;
 	private final FPSAnimator animator;
+	private final JComboBox<AlgorithmType> algorithm;
 
 	private Sorter sorter = null;
 
 	public MainWindow() {
+		super();
+
+		this.getContentPane().setLayout(new MigLayout("insets 10", "[grow, fill][]", "[grow, fill]"));
+		this.getContentPane().setBackground(Color.GRAY.brighter());
+
 		visualizer = new Visualizer();
 		visualizer.setPreferredSize(new Dimension(CANVAS_WIDTH, CANVAS_HEIGHT));
-		createSorter(String.valueOf(Sorter.DEFAULT_ELEMENT_AMOUNT));
-		JPanel pane = new JPanel();
-		pane.add(visualizer);
+		this.getContentPane().add(visualizer, "cell 0 0");
+
 		animator = new FPSAnimator(visualizer, FPS, true);
 
-		this.setLayout(new BorderLayout());
-		this.getContentPane().add(pane, BorderLayout.CENTER);
-		JPanel buttons = new JPanel();
-		buttons.setLayout(new FlowLayout());
+		JPanel hudPanel = new JPanel(new MigLayout("insets 0", "[grow, fill]", "push[]40[]20[]push"));
+		hudPanel.setBackground(Color.GRAY.brighter());
 
-		JLabel desc = new JLabel("N:");
-		buttons.add(desc);
-		elements = new JTextField("100");
-		elements.setPreferredSize(new Dimension(50, 25));
-		elements.setText(String.valueOf(Sorter.DEFAULT_ELEMENT_AMOUNT));
-		buttons.add(elements);
+		JPanel config = new JPanel(new MigLayout("insets 0", "[][grow, fill]", "[]15[][][]"));
+		config.setBackground(Color.GRAY.brighter());
 
-		JButton random = new JButton("Random");
-		random.addActionListener((a) -> createSorter(elements.getText()));
-		buttons.add(random);
+		config.add(new JLabel("Elements"), "cell 0 0");
+		elements = new JTextField(String.valueOf(Sorter.DEFAULT_ELEMENT_AMOUNT));
+		elements.setPreferredSize(new Dimension((int) 100, elements.getHeight()));
+		config.add(elements, "cell 1 0");
+
+		config.add(new JLabel("Algorithm"), "cell 0 1");
+		algorithm = new JComboBox<>(AlgorithmDeployment.getAlgorithms());
+		config.add(algorithm, "cell 1 1");
+
+		config.add(new JLabel("Operation sleep times (μs)"), "cell 0 2, span 2 1");
+
+		config.add(new JLabel("Comparison"), "cell 0 3");
+		comparisonSleep = new JTextField(String.valueOf(Sorter.DEFAULT_COMPARISON_SLEEP));
+		comparisonSleep.setPreferredSize(new Dimension((int) 100, elements.getHeight()));
+		config.add(comparisonSleep, "cell 1 3");
+
+		config.add(new JLabel("Swap"), "cell 0 4");
+		swapSleep = new JTextField(String.valueOf(Sorter.DEFAULT_COMPARISON_SLEEP));
+		swapSleep.setPreferredSize(new Dimension((int) 100, elements.getHeight()));
+		config.add(swapSleep, "cell 1 4");
+
+		hudPanel.add(config, "cell 0 0");
+
+		JButton random = new JButton("Randomize");
+		random.addActionListener((a) -> createSorter());
+		hudPanel.add(random, "cell 0 1, grow");
 
 		JButton sort = new JButton("Sort");
-		sort.addActionListener((a) -> {
-			if (sorter != null) {
-				sorter.startSorting(new InsertionSort());
-			} else {
-				LOG.warn("Sorter should not be null");
-				createSorter(elements.getText());
-			}
-		});
-		buttons.add(sort);
+		sort.addActionListener((a) -> start());
+		hudPanel.add(sort, "cell 0 2, grow");
 
-		this.getContentPane().add(buttons, BorderLayout.NORTH);
+		add(hudPanel, "cell 1 0");
 
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
 		this.setTitle(TITLE);
 		this.pack();
+		createSorter();
 		this.setVisible(true);
 		animator.start();
 	}
@@ -103,17 +122,54 @@ public class MainWindow extends JFrame {
 		}
 	}
 
-	private void createSorter(String string) {
-		int amount = Sorter.DEFAULT_ELEMENT_AMOUNT;
-		try {
-			amount = Integer.parseInt(string);
-		} catch (NumberFormatException e) {
-			LOG.error("Invalid value in number of elements!");
+	private void start() {
+		if (sorter == null) {
+			LOG.error("Sorter null on start!");
+			createSorter();
 		}
+		sorter.startSorting(getAlgorithm());
+	}
+
+	private Algorithm getAlgorithm() {
+		AlgorithmType type = AlgorithmType.INSERTION_SORT;
+		return AlgorithmDeployment.getImplementationFor(type).setDelays(getCompareSleep(), getSwapSleep());
+	}
+
+	private void createSorter() {
 		if (sorter != null) {
 			sorter.destroy();
 		}
-		sorter = new Sorter(visualizer, amount);
+		sorter = new Sorter(visualizer, getElementsCount());
+	}
+
+	private int getElementsCount() {
+		int amount = Sorter.DEFAULT_ELEMENT_AMOUNT;
+		try {
+			amount = Integer.parseInt(elements.getText());
+		} catch (NumberFormatException e) {
+			LOG.error("Invalid value in number of elements!");
+		}
+		return amount;
+	}
+
+	private int getCompareSleep() {
+		int amount = Sorter.DEFAULT_COMPARISON_SLEEP;
+		try {
+			amount = Integer.parseInt(comparisonSleep.getText());
+		} catch (NumberFormatException e) {
+			LOG.error("Invalid value in comparison sleep!");
+		}
+		return amount;
+	}
+
+	private int getSwapSleep() {
+		int amount = Sorter.DEFAULT_SWAP_SLEEP;
+		try {
+			amount = Integer.parseInt(swapSleep.getText());
+		} catch (NumberFormatException e) {
+			LOG.error("Invalid value in swap sleep!");
+		}
+		return amount;
 	}
 
 	/**

@@ -4,6 +4,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class InsertionSort extends AbstractAlgorithm {
+
+	protected InsertionSort() {
+		super();
+	}
+
+	public InsertionSort(int comparisonSleepMicros, int swapSleepMicros) {
+		super(comparisonSleepMicros, swapSleepMicros);
+	}
+
 	private static final Logger LOG = LoggerFactory.getLogger(InsertionSort.class);
 
 	@Override
@@ -24,6 +33,11 @@ public class InsertionSort extends AbstractAlgorithm {
 	@Override
 	public AlgorithmType getType() {
 		return AlgorithmType.INSERTION_SORT;
+	}
+
+	@Override
+	public Algorithm setDelays(int comparisonSleepMicros, int swapSleepMicros) {
+		return new InsertionSort(comparisonSleepMicros, swapSleepMicros);
 	}
 
 }
