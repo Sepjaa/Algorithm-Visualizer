@@ -6,8 +6,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Base class for algorithm containing the logic operations used in algorithm.
  * Logic operations are compare and swap. Operations use/manipulate the array of
- * bytes using two indexes. Indexes are used to possibly record a history of
- * algorithm operations in future.
+ * bytes using two indexes.
  *
  * TODO: variable sleeps
  *
@@ -18,6 +17,9 @@ public abstract class AbstractAlgorithm implements Algorithm {
 	private static final Logger LOG = LoggerFactory.getLogger(AbstractAlgorithm.class);
 	private final int compareSleep;
 	private final int swapSleep;
+
+	private int[] lastSwapIndexes;
+	private int[] lastComparisonIndexes;
 
 	protected AbstractAlgorithm() {
 		this.compareSleep = 0;
@@ -37,6 +39,15 @@ public abstract class AbstractAlgorithm implements Algorithm {
 		} else {
 			this.swapSleep = swapSleepMicros;
 		}
+	}
+
+	protected abstract void sort(short[] array);
+
+	@Override
+	public void sort(short[] listToBeSorted, int[] lastComparisonIndexes, int[] lastSwapIndexes) {
+		this.lastComparisonIndexes = lastComparisonIndexes;
+		this.lastSwapIndexes = lastSwapIndexes;
+		sort(listToBeSorted);
 	}
 
 	private void sleep(int micros) {
@@ -59,6 +70,10 @@ public abstract class AbstractAlgorithm implements Algorithm {
 	}
 
 	protected boolean lessThan(short[] list, int index1, int index2, boolean allowEqual) {
+		lastComparisonIndexes[0] = index1;
+		lastComparisonIndexes[1] = index2;
+		lastSwapIndexes[0] = -1;
+		lastSwapIndexes[1] = -1;
 		sleep(compareSleep);
 		if (allowEqual) {
 			return list[index1] <= list[index2];
@@ -67,6 +82,10 @@ public abstract class AbstractAlgorithm implements Algorithm {
 	}
 
 	protected boolean biggerThan(short[] list, int index1, int index2, boolean allowEqual) {
+		lastComparisonIndexes[0] = index1;
+		lastComparisonIndexes[1] = index2;
+		lastSwapIndexes[0] = -1;
+		lastSwapIndexes[1] = -1;
 		sleep(compareSleep);
 		if (allowEqual) {
 			return list[index1] >= list[index2];
@@ -75,9 +94,13 @@ public abstract class AbstractAlgorithm implements Algorithm {
 	}
 
 	protected void swap(short[] listToBeSorted, int index1, int index2) {
-		sleep(swapSleep);
 		short temp = listToBeSorted[index1];
 		listToBeSorted[index1] = listToBeSorted[index2];
 		listToBeSorted[index2] = temp;
+		lastSwapIndexes[0] = index1;
+		lastSwapIndexes[1] = index2;
+		lastComparisonIndexes[0] = -1;
+		lastComparisonIndexes[1] = -1;
+		sleep(swapSleep);
 	}
 }

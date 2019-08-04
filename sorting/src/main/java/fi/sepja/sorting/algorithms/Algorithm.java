@@ -13,7 +13,7 @@ public interface Algorithm {
 	/**
 	 * Sorts the byte array in the caller thread.
 	 */
-	void sort(short[] listToBeSorted);
+	void sort(short[] listToBeSorted, int[] lastComparisonIndexes, int[] lastSwapIndexes);
 
 	/**
 	 * Sets the algorithm operation delays.

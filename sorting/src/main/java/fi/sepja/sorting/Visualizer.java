@@ -11,7 +11,8 @@ import com.jogamp.opengl.GLEventListener;
 import com.jogamp.opengl.awt.GLCanvas;
 
 /**
- * GLCanvas for drawing the array state.
+ * GLCanvas for drawing the array state, uses references to diffrent arrays to
+ * draw, which are binded with bind-methods.
  *
  * @author Jaakko
  *
@@ -22,16 +23,37 @@ public class Visualizer extends GLCanvas implements GLEventListener {
 	 *
 	 */
 	private static final long serialVersionUID = 6146921870949093036L;
-	private Object arrayLock = new Object();
-	private short[] array;
+
+	private Object arrayDrawCopyLock = new Object();
+	private short[] array = new short[1];
+	private int[] lastSwapIndexes = { -1, -1 };
+	private int[] lastComparisonIndexes = { -1, -1 };
 
 	public Visualizer() {
 		this.addGLEventListener(this);
 	}
 
-	public void bindToArray(short[] array) {
-		synchronized (arrayLock) {
+	public void bindArray(short[] array) {
+		synchronized (arrayDrawCopyLock) {
 			this.array = array;
+		}
+	}
+
+	public void bindSwapAndCompareArray(int[] lastSwapIndexes, int[] lastComparisonIndexes) {
+		synchronized (arrayDrawCopyLock) {
+			this.lastComparisonIndexes = lastComparisonIndexes;
+			this.lastSwapIndexes = lastSwapIndexes;
+		}
+	}
+
+	public void unbindSwapAndCompareArray() {
+		synchronized (arrayDrawCopyLock) {
+			this.lastSwapIndexes = new int[2];
+			lastSwapIndexes[0] = -1;
+			lastSwapIndexes[1] = -1;
+			this.lastComparisonIndexes = new int[2];
+			lastComparisonIndexes[0] = -1;
+			lastComparisonIndexes[1] = -1;
 		}
 	}
 
@@ -66,11 +88,21 @@ public class Visualizer extends GLCanvas implements GLEventListener {
 		gl.glBegin(GL_QUADS);
 		gl.glColor3f(0f, 0f, 0f);
 		short[] drawCopy;
-		synchronized (arrayLock) {
+		int[] swapDrawCopy;
+		int[] comparisonDrawCopy;
+		synchronized (arrayDrawCopyLock) {
 			drawCopy = Arrays.copyOf(array, array.length);
+			comparisonDrawCopy = Arrays.copyOf(lastComparisonIndexes, 2);
+			swapDrawCopy = Arrays.copyOf(lastSwapIndexes, 2);
 		}
 		float width = 2f / drawCopy.length;
 		for (int i = 0; i < drawCopy.length; i++) {
+			if (i == swapDrawCopy[0] || i == swapDrawCopy[1]) {
+				gl.glColor3f(1f, 0f, 0f);
+			}
+			if (i == comparisonDrawCopy[0] || i == comparisonDrawCopy[1]) {
+				gl.glColor3f(0f, 0f, 1f);
+			}
 			gl.glVertex2f(i * width, drawCopy[i] * 0.002f);
 			gl.glVertex2f(i * width, 0);
 			gl.glVertex2f((i + 1) * width, 0);

@@ -12,7 +12,8 @@ import org.slf4j.LoggerFactory;
 import fi.sepja.sorting.algorithms.Algorithm;
 
 /**
- * Handles all the sorting execution.
+ * Handles all the sorting execution and creation/distribution of array
+ * references.
  *
  * @author Jaakko
  *
@@ -27,6 +28,8 @@ public class Sorter {
 	private final ExecutorService executor = Executors.newSingleThreadExecutor();
 
 	private final short[] elements;
+	private final int[] lastSwapIndexes = { -1, -1 };
+	private final int[] lastComparisonIndexes = { -1, -1 };
 
 	public Sorter(Visualizer visualizer, int elementCount) {
 		if (elementCount <= 0) {
@@ -37,7 +40,8 @@ public class Sorter {
 		for (int i = 0; i < elementCount; i++) {
 			elements[i] = (short) random.nextInt(1001);
 		}
-		visualizer.bindToArray(elements);
+		visualizer.bindSwapAndCompareArray(lastSwapIndexes, lastComparisonIndexes);
+		visualizer.bindArray(elements);
 		LOG.info("Sorter {} created with {} elements", this, elements.length);
 	}
 
@@ -65,6 +69,6 @@ public class Sorter {
 	 */
 	public Future<?> startSorting(Algorithm algorithm) {
 		LOG.info("{} starting sorting with {} elements", this, elements.length);
-		return executor.submit(() -> algorithm.sort(elements));
+		return executor.submit(() -> algorithm.sort(elements, lastComparisonIndexes, lastSwapIndexes));
 	}
 }
