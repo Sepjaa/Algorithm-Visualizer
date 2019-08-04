@@ -2,6 +2,9 @@ package fi.sepja.sorting;
 
 import java.awt.Color;
 import java.awt.Dimension;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -37,6 +40,8 @@ public class MainWindow extends JFrame {
 	private static final int CANVAS_WIDTH = 600;
 	private static final int CANVAS_HEIGHT = 400;
 	private static final int FPS = 144;
+	private static final String LBL_STOP_SORTING = "Stop Sorting";
+	private static final String LBL_START_SORTING = "Sort";
 
 	private final Visualizer visualizer;
 	private final JTextField elements, comparisonSleep, swapSleep;
@@ -44,6 +49,9 @@ public class MainWindow extends JFrame {
 	private final JComboBox<AlgorithmType> algorithm;
 
 	private Sorter sorter = null;
+	private Future<?> sortFuture = null;
+	private JButton randomize;
+	private JButton sort;
 
 	public MainWindow() {
 		super();
@@ -86,12 +94,12 @@ public class MainWindow extends JFrame {
 
 		hudPanel.add(config, "cell 0 0");
 
-		JButton random = new JButton("Randomize");
-		random.addActionListener((a) -> createSorter());
-		hudPanel.add(random, "cell 0 1, grow");
+		randomize = new JButton("Randomize");
+		randomize.addActionListener((a) -> createSorter());
+		hudPanel.add(randomize, "cell 0 1, grow");
 
-		JButton sort = new JButton("Sort");
-		sort.addActionListener((a) -> start());
+		sort = new JButton(LBL_START_SORTING);
+		sort.addActionListener((a) -> sortButtonPressed());
 		hudPanel.add(sort, "cell 0 2, grow");
 
 		add(hudPanel, "cell 1 0");
@@ -122,12 +130,40 @@ public class MainWindow extends JFrame {
 		}
 	}
 
-	private void start() {
-		if (sorter == null) {
-			LOG.error("Sorter null on start!");
-			createSorter();
+	private void sortButtonPressed() {
+		if (sortFuture == null) {
+			// Start sorting
+			if (sorter == null) {
+				LOG.error("Sorter null on start!");
+				createSorter();
+			}
+			sortFuture = sorter.startSorting(getAlgorithm());
+			randomize.setEnabled(false);
+			sort.setText(LBL_STOP_SORTING);
+			threadedWaitWithRunOnEDT(sortFuture, () -> {
+				sortFuture = null;
+				randomize.setEnabled(true);
+				sort.setText(LBL_START_SORTING);
+			});
+		} else {
+			sortFuture.cancel(true);
 		}
-		sorter.startSorting(getAlgorithm());
+	}
+
+	private void threadedWaitWithRunOnEDT(Future<?> wait, Runnable onGetFinishEDT) {
+		new Thread(() -> {
+			try {
+				wait.get();
+			} catch (InterruptedException e) {
+				LOG.info("Interrupted while waiting for future!");
+				Thread.currentThread().interrupt();
+			} catch (ExecutionException e) {
+				LOG.error("Execution exception while waiting for future!", e);
+			} catch (CancellationException e) {
+				LOG.info("Cancelled while waiting for future!");
+			}
+			SwingUtilities.invokeLater(onGetFinishEDT);
+		}).start();
 	}
 
 	private Algorithm getAlgorithm() {

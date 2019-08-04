@@ -3,6 +3,7 @@ package fi.sepja.sorting;
 import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
@@ -60,10 +61,10 @@ public class Sorter {
 	}
 
 	/**
-	 * Starts sorting in the executor thread.
+	 * Starts sorting in the executor thread and returns a future for it.
 	 */
-	public void startSorting(Algorithm algorithm) {
+	public Future<?> startSorting(Algorithm algorithm) {
 		LOG.info("{} starting sorting with {} elements", this, elements.length);
-		executor.submit(() -> algorithm.sort(elements));
+		return executor.submit(() -> algorithm.sort(elements));
 	}
 }
