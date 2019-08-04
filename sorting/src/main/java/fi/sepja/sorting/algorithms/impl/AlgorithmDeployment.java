@@ -42,6 +42,12 @@ public class AlgorithmDeployment {
 		case COCKTAIL_SHAKER_SORT: {
 			return new CocktailShakerSort();
 		}
+		case QUICKSORT: {
+			return new Quicksort();
+		}
+		case HEAPSORT: {
+			return new Heapsort();
+		}
 		}
 		LOG.error("Add implementation for {}", type);
 		throw new UnsupportedOperationException("No implementation for algorithm type " + type);
