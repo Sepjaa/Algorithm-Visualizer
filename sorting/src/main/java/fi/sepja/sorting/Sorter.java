@@ -40,7 +40,6 @@ public class Sorter {
 		for (int i = 0; i < elementCount; i++) {
 			elements[i] = (short) random.nextInt(1001);
 		}
-		visualizer.bindSwapAndCompareArray(lastSwapIndexes, lastComparisonIndexes);
 		visualizer.bindArray(elements);
 		LOG.info("Sorter {} created with {} elements", this, elements.length);
 	}
@@ -67,8 +66,12 @@ public class Sorter {
 	/**
 	 * Starts sorting in the executor thread and returns a future for it.
 	 */
-	public Future<?> startSorting(Algorithm algorithm) {
+	public Future<?> startSorting(Algorithm algorithm, Visualizer visualizer) {
 		LOG.info("{} starting sorting with {} elements", this, elements.length);
-		return executor.submit(() -> algorithm.sort(elements, lastComparisonIndexes, lastSwapIndexes));
+		return executor.submit(() -> {
+			visualizer.bindCompareSwapArrays(lastComparisonIndexes, lastSwapIndexes);
+			algorithm.sort(elements, lastComparisonIndexes, lastSwapIndexes);
+			visualizer.unbindSwapAndCompareArray();
+		});
 	}
 }

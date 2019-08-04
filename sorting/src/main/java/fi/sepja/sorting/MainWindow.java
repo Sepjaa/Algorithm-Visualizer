@@ -137,7 +137,7 @@ public class MainWindow extends JFrame {
 				LOG.error("Sorter null on start!");
 				createSorter();
 			}
-			sortFuture = sorter.startSorting(getAlgorithm());
+			sortFuture = sorter.startSorting(getAlgorithm(), visualizer);
 			randomize.setEnabled(false);
 			sort.setText(LBL_STOP_SORTING);
 			threadedWaitWithRunOnEDT(sortFuture, () -> {

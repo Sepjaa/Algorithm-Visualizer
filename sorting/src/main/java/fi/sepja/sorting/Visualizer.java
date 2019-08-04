@@ -39,7 +39,7 @@ public class Visualizer extends GLCanvas implements GLEventListener {
 		}
 	}
 
-	public void bindSwapAndCompareArray(int[] lastSwapIndexes, int[] lastComparisonIndexes) {
+	public void bindCompareSwapArrays(int[] lastComparisonIndexes, int[] lastSwapIndexes) {
 		synchronized (arrayDrawCopyLock) {
 			this.lastComparisonIndexes = lastComparisonIndexes;
 			this.lastSwapIndexes = lastSwapIndexes;
