@@ -41,7 +41,7 @@ public interface Algorithm {
 	public enum AlgorithmType {
 
 		INSERTION_SORT("Insertion Sort"), COCKTAIL_SHAKER_SORT("Cocktail Shaker Sort"), QUICK_SORT("Quick Sort"),
-		HEAP_SORT("Heap Sort"), MERGE_SORT("Merge Sort");
+		HEAP_SORT("Heap Sort"), MERGE_SORT("Merge Sort"), SELECTION_SORT("Selection Sort"), SHELL_SORT("Shell Sort");
 
 		private String value;
 

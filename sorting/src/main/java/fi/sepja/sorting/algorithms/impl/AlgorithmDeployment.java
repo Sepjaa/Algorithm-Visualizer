@@ -51,6 +51,12 @@ public class AlgorithmDeployment {
 		case MERGE_SORT: {
 			return new MergeSort();
 		}
+		case SELECTION_SORT: {
+			return new SelectionSort();
+		}
+		case SHELL_SORT: {
+			return new ShellSort();
+		}
 		}
 		LOG.error("Add implementation for {}", type);
 		throw new UnsupportedOperationException("No implementation for algorithm type " + type);

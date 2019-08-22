@@ -32,15 +32,26 @@ public class Sorter {
 	private final int[] lastSwapIndexes = { -1, -1, -1, -1 };
 	private final int[] lastComparisonIndexes = { -1, -1, -1, -1 };
 
-	public Sorter(Visualizer visualizer, int elementCount, boolean withMemoryArray) {
+	public Sorter(Visualizer visualizer, int elementCount, boolean withMemoryArray, boolean tempMemory) {
 		if (elementCount <= 0) {
 			LOG.error("Invalid element count {}, set to default {}", elementCount, DEFAULT_ELEMENT_AMOUNT);
 			elementCount = DEFAULT_ELEMENT_AMOUNT;
 		}
-		elements = new short[elementCount];
-		elementsMemory = new short[elementCount];
-		for (int i = 0; i < elementCount; i++) {
-			elements[i] = (short) random.nextInt(1001);
+		if (!tempMemory) {
+			elements = new short[elementCount];
+			elementsMemory = new short[elementCount];
+		} else {
+			elements = new short[elementCount + 1];
+			elementsMemory = new short[elementCount + 1];
+		}
+		if (!tempMemory) {
+			for (int i = 0; i < elementCount; i++) {
+				elements[i] = (short) random.nextInt(1001);
+			}
+		} else {
+			for (int i = 0; i < elementCount; i++) {
+				elements[i] = (short) random.nextInt(1001);
+			}
 		}
 		if (withMemoryArray) {
 			visualizer.bindArrayWithMemory(elements, elementsMemory);

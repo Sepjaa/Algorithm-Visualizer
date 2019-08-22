@@ -184,13 +184,19 @@ public class MainWindow extends JFrame {
 		if (sorter != null) {
 			sorter.destroy();
 		}
-		sorter = new Sorter(visualizer, getElementsCount(), isMemoryAlgorithm());
+		sorter = new Sorter(visualizer, getElementsCount(), isMemoryAlgorithm(), isTempAlgorithm());
 	}
 
 	private boolean isMemoryAlgorithm() {
 		if (getAlgorithm().getType().equals(Algorithm.AlgorithmType.MERGE_SORT)) {
 			return true;
+		}
+		return false;
+	}
 
+	private boolean isTempAlgorithm() {
+		if (getAlgorithm().getType().equals(Algorithm.AlgorithmType.SHELL_SORT)) {
+			return true;
 		}
 		return false;
 	}
