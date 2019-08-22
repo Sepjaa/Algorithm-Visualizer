@@ -28,19 +28,25 @@ public class Sorter {
 	private final ExecutorService executor = Executors.newSingleThreadExecutor();
 
 	private final short[] elements;
-	private final int[] lastSwapIndexes = { -1, -1 };
-	private final int[] lastComparisonIndexes = { -1, -1 };
+	private final short[] elementsMemory;
+	private final int[] lastSwapIndexes = { -1, -1, -1, -1 };
+	private final int[] lastComparisonIndexes = { -1, -1, -1, -1 };
 
-	public Sorter(Visualizer visualizer, int elementCount) {
+	public Sorter(Visualizer visualizer, int elementCount, boolean withMemoryArray) {
 		if (elementCount <= 0) {
 			LOG.error("Invalid element count {}, set to default {}", elementCount, DEFAULT_ELEMENT_AMOUNT);
 			elementCount = DEFAULT_ELEMENT_AMOUNT;
 		}
 		elements = new short[elementCount];
+		elementsMemory = new short[elementCount];
 		for (int i = 0; i < elementCount; i++) {
 			elements[i] = (short) random.nextInt(1001);
 		}
-		visualizer.bindArray(elements);
+		if (withMemoryArray) {
+			visualizer.bindArrayWithMemory(elements, elementsMemory);
+		} else {
+			visualizer.bindArray(elements);
+		}
 		LOG.info("Sorter {} created with {} elements", this, elements.length);
 	}
 
@@ -70,7 +76,7 @@ public class Sorter {
 		LOG.info("{} starting sorting with {} elements", this, elements.length);
 		return executor.submit(() -> {
 			visualizer.bindCompareSwapArrays(lastComparisonIndexes, lastSwapIndexes);
-			algorithm.sort(elements, lastComparisonIndexes, lastSwapIndexes);
+			algorithm.sort(elements, elementsMemory, lastComparisonIndexes, lastSwapIndexes);
 			visualizer.unbindSwapAndCompareArray();
 		});
 	}

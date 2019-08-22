@@ -13,7 +13,7 @@ public interface Algorithm {
 	/**
 	 * Sorts the byte array in the caller thread.
 	 */
-	void sort(short[] listToBeSorted, int[] lastComparisonIndexes, int[] lastSwapIndexes);
+	void sort(short[] listToBeSorted, short[] memoryArray, int[] lastComparisonIndexes, int[] lastSwapIndexes);
 
 	/**
 	 * Sets the algorithm operation delays.
@@ -40,8 +40,8 @@ public interface Algorithm {
 	 */
 	public enum AlgorithmType {
 
-		INSERTION_SORT("Insertion Sort"), COCKTAIL_SHAKER_SORT("Cocktail Shaker Sort"), QUICKSORT("Quicksort"),
-		HEAPSORT("Heapsort");
+		INSERTION_SORT("Insertion Sort"), COCKTAIL_SHAKER_SORT("Cocktail Shaker Sort"), QUICK_SORT("Quick Sort"),
+		HEAP_SORT("Heap Sort"), MERGE_SORT("Merge Sort");
 
 		private String value;
 

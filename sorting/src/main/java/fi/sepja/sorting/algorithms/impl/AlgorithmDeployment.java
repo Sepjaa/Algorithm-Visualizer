@@ -42,11 +42,14 @@ public class AlgorithmDeployment {
 		case COCKTAIL_SHAKER_SORT: {
 			return new CocktailShakerSort();
 		}
-		case QUICKSORT: {
-			return new Quicksort();
+		case QUICK_SORT: {
+			return new QuickSort();
 		}
-		case HEAPSORT: {
-			return new Heapsort();
+		case HEAP_SORT: {
+			return new HeapSort();
+		}
+		case MERGE_SORT: {
+			return new MergeSort();
 		}
 		}
 		LOG.error("Add implementation for {}", type);

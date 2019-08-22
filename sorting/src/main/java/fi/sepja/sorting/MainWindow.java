@@ -78,6 +78,7 @@ public class MainWindow extends JFrame {
 
 		config.add(new JLabel("Algorithm"), "cell 0 1");
 		algorithm = new JComboBox<>(AlgorithmDeployment.getAlgorithms());
+		algorithm.addActionListener(a -> createSorter());
 		config.add(algorithm, "cell 1 1");
 
 		config.add(new JLabel("Operation sleep times (μs)"), "cell 0 2, span 2 1");
@@ -138,16 +139,24 @@ public class MainWindow extends JFrame {
 				createSorter();
 			}
 			sortFuture = sorter.startSorting(getAlgorithm(), visualizer);
-			randomize.setEnabled(false);
+			setConfigEnables(false);
 			sort.setText(LBL_STOP_SORTING);
 			threadedWaitWithRunOnEDT(sortFuture, () -> {
 				sortFuture = null;
-				randomize.setEnabled(true);
+				setConfigEnables(true);
 				sort.setText(LBL_START_SORTING);
 			});
 		} else {
 			sortFuture.cancel(true);
 		}
+	}
+
+	private void setConfigEnables(boolean enabled) {
+		randomize.setEnabled(enabled);
+		elements.setEnabled(enabled);
+		algorithm.setEnabled(enabled);
+		comparisonSleep.setEnabled(enabled);
+		swapSleep.setEnabled(enabled);
 	}
 
 	private void threadedWaitWithRunOnEDT(Future<?> wait, Runnable onGetFinishEDT) {
@@ -175,7 +184,15 @@ public class MainWindow extends JFrame {
 		if (sorter != null) {
 			sorter.destroy();
 		}
-		sorter = new Sorter(visualizer, getElementsCount());
+		sorter = new Sorter(visualizer, getElementsCount(), isMemoryAlgorithm());
+	}
+
+	private boolean isMemoryAlgorithm() {
+		if (getAlgorithm().getType().equals(Algorithm.AlgorithmType.MERGE_SORT)) {
+			return true;
+
+		}
+		return false;
 	}
 
 	private int getElementsCount() {

@@ -6,9 +6,8 @@ import org.slf4j.LoggerFactory;
 /**
  * Base class for algorithm containing the logic operations used in algorithm.
  * Logic operations are compare and swap. Operations use/manipulate the array of
- * bytes using two indexes.
+ * shorts using two indexes.
  *
- * TODO: variable sleeps
  *
  * @author Jaakko
  *
@@ -20,6 +19,10 @@ public abstract class AbstractAlgorithm implements Algorithm {
 
 	private int[] lastSwapIndexes;
 	private int[] lastComparisonIndexes;
+
+	protected boolean swap = false;
+
+	protected boolean memoryAndArraySwapped = false;
 
 	protected AbstractAlgorithm() {
 		this.compareSleep = 0;
@@ -41,13 +44,13 @@ public abstract class AbstractAlgorithm implements Algorithm {
 		}
 	}
 
-	protected abstract void sort(short[] array);
+	protected abstract void sort(short[] array, short[] memoryArray);
 
 	@Override
-	public void sort(short[] listToBeSorted, int[] lastComparisonIndexes, int[] lastSwapIndexes) {
+	public void sort(short[] array, short[] memoryArray, int[] lastComparisonIndexes, int[] lastSwapIndexes) {
 		this.lastComparisonIndexes = lastComparisonIndexes;
 		this.lastSwapIndexes = lastSwapIndexes;
-		sort(listToBeSorted);
+		sort(array, memoryArray);
 	}
 
 	private void sleep(int micros) {
@@ -69,38 +72,88 @@ public abstract class AbstractAlgorithm implements Algorithm {
 		}
 	}
 
-	protected boolean lessThan(short[] list, int index1, int index2, boolean allowEqual) {
-		lastComparisonIndexes[0] = index1;
-		lastComparisonIndexes[1] = index2;
-		lastSwapIndexes[0] = -1;
-		lastSwapIndexes[1] = -1;
+	protected boolean lessThan(short[] array, int index1, int index2, boolean allowEqual) {
+		lastComparison(index1, index2);
 		sleep(compareSleep);
 		if (allowEqual) {
-			return list[index1] <= list[index2];
+			return array[index1] <= array[index2];
 		}
-		return list[index1] < list[index2];
+		return array[index1] < array[index2];
 	}
 
-	protected boolean biggerThan(short[] list, int index1, int index2, boolean allowEqual) {
-		lastComparisonIndexes[0] = index1;
-		lastComparisonIndexes[1] = index2;
-		lastSwapIndexes[0] = -1;
-		lastSwapIndexes[1] = -1;
+	protected boolean biggerThan(short[] array, int index1, int index2, boolean allowEqual) {
+		lastComparison(index1, index2);
 		sleep(compareSleep);
 		if (allowEqual) {
-			return list[index1] >= list[index2];
+			return array[index1] >= array[index2];
 		}
-		return list[index1] > list[index2];
+		return array[index1] > array[index2];
 	}
 
-	protected void swap(short[] listToBeSorted, int index1, int index2) {
-		short temp = listToBeSorted[index1];
-		listToBeSorted[index1] = listToBeSorted[index2];
-		listToBeSorted[index2] = temp;
-		lastSwapIndexes[0] = index1;
-		lastSwapIndexes[1] = index2;
+	protected void swap(short[] array, int index1, int index2) {
+		if (index1 == index2) {
+			return;
+		}
+		short temp = array[index1];
+		array[index1] = array[index2];
+		array[index2] = temp;
+		lastSwap(index1, index2);
+		sleep(swapSleep);
+	}
+
+	protected void copyArray(short[] array, short[] memoryArray) {
+		for (int i = 0; i < array.length; i++) {
+			if (Thread.currentThread().isInterrupted()) {
+				return;
+			}
+			memoryArray[i] = array[i];
+			lastSwap(i, i);
+			sleep(swapSleep);
+		}
+	}
+
+	/**
+	 * Copies index value from array to memoryArray.
+	 */
+	protected void copyIndexValue(short[] array, short[] memoryArray, int arrayIndex, int memoryIndex) {
+		memoryArray[memoryIndex] = array[arrayIndex];
+		lastSwap(memoryIndex, memoryIndex);
+		sleep(swapSleep);
+	}
+
+	private void lastSwap(int index1, int index2) {
+		if (swap) {
+			lastSwapIndexes[0] = -1;
+			lastSwapIndexes[1] = -1;
+			lastSwapIndexes[2] = index1;
+			lastSwapIndexes[3] = index2;
+		} else {
+			lastSwapIndexes[0] = index1;
+			lastSwapIndexes[1] = index2;
+			lastSwapIndexes[2] = -1;
+			lastSwapIndexes[3] = -1;
+		}
 		lastComparisonIndexes[0] = -1;
 		lastComparisonIndexes[1] = -1;
-		sleep(swapSleep);
+		lastComparisonIndexes[2] = -1;
+		lastComparisonIndexes[3] = -1;
+	}
+
+	private void lastComparison(int index1, int index2) {
+		if (swap) {
+			lastComparisonIndexes[0] = -1;
+			lastComparisonIndexes[1] = -1;
+			lastComparisonIndexes[2] = index1;
+			lastComparisonIndexes[3] = index2;
+		} else {
+			lastComparisonIndexes[0] = index1;
+			lastComparisonIndexes[1] = index2;
+			lastComparisonIndexes[2] = -1;
+			lastComparisonIndexes[3] = -1;
+		}
+		lastSwapIndexes[0] = -1;
+		lastSwapIndexes[1] = -1;
+		lastSwapIndexes[2] = -1;
+		lastSwapIndexes[3] = -1;
 	}
 }

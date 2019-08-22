@@ -3,28 +3,28 @@ package fi.sepja.sorting.algorithms.impl;
 import fi.sepja.sorting.algorithms.AbstractAlgorithm;
 import fi.sepja.sorting.algorithms.Algorithm;
 
-public class Heapsort extends AbstractAlgorithm {
+public class HeapSort extends AbstractAlgorithm {
 
-	Heapsort() {
+	HeapSort() {
 		super();
 	}
 
-	private Heapsort(int comparisonSleepMicros, int swapSleepMicros) {
+	private HeapSort(int comparisonSleepMicros, int swapSleepMicros) {
 		super(comparisonSleepMicros, swapSleepMicros);
 	}
 
 	@Override
 	public Algorithm setDelays(int comparisonSleepMicros, int swapSleepMicros) {
-		return new Heapsort(comparisonSleepMicros, swapSleepMicros);
+		return new HeapSort(comparisonSleepMicros, swapSleepMicros);
 	}
 
 	@Override
 	public AlgorithmType getType() {
-		return AlgorithmType.HEAPSORT;
+		return AlgorithmType.HEAP_SORT;
 	}
 
 	@Override
-	protected void sort(short[] array) {
+	protected void sort(short[] array, short[] memoryArray) {
 		int length = array.length;
 		buildMaxHeap(array, length);
 		for (int i = length - 1; i > 0; i--) {

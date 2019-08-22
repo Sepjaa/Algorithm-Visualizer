@@ -5,29 +5,29 @@ import java.util.Random;
 import fi.sepja.sorting.algorithms.AbstractAlgorithm;
 import fi.sepja.sorting.algorithms.Algorithm;
 
-public class Quicksort extends AbstractAlgorithm {
+public class QuickSort extends AbstractAlgorithm {
 	private final Random random = new Random();
 
-	Quicksort() {
+	QuickSort() {
 		super();
 	}
 
-	private Quicksort(int comparisonSleepMicros, int swapSleepMicros) {
+	private QuickSort(int comparisonSleepMicros, int swapSleepMicros) {
 		super(comparisonSleepMicros, swapSleepMicros);
 	}
 
 	@Override
 	public Algorithm setDelays(int comparisonSleepMicros, int swapSleepMicros) {
-		return new Quicksort(comparisonSleepMicros, swapSleepMicros);
+		return new QuickSort(comparisonSleepMicros, swapSleepMicros);
 	}
 
 	@Override
 	public AlgorithmType getType() {
-		return AlgorithmType.QUICKSORT;
+		return AlgorithmType.QUICK_SORT;
 	}
 
 	@Override
-	protected void sort(short[] array) {
+	protected void sort(short[] array, short[] memoryArray) {
 		quicksort(array, 0, array.length);
 	}
 

@@ -14,9 +14,9 @@ public class CocktailShakerSort extends AbstractAlgorithm {
 	}
 
 	@Override
-	public void sort(short[] listToBeSorted) {
+	public void sort(short[] array, short[] memoryArray) {
 		int begin = 0;
-		int end = listToBeSorted.length - 2;
+		int end = array.length - 2;
 		while (begin <= end && !Thread.currentThread().isInterrupted()) {
 			int newBegin = end;
 			int newEnd = begin;
@@ -24,8 +24,8 @@ public class CocktailShakerSort extends AbstractAlgorithm {
 				if (Thread.currentThread().isInterrupted()) {
 					return;
 				}
-				if (biggerThan(listToBeSorted, i, i + 1, false)) {
-					swap(listToBeSorted, i, i + 1);
+				if (biggerThan(array, i, i + 1, false)) {
+					swap(array, i, i + 1);
 					newEnd = i;
 				}
 			}
@@ -34,8 +34,8 @@ public class CocktailShakerSort extends AbstractAlgorithm {
 				if (Thread.currentThread().isInterrupted()) {
 					return;
 				}
-				if (biggerThan(listToBeSorted, i, i + 1, false)) {
-					swap(listToBeSorted, i, i + 1);
+				if (biggerThan(array, i, i + 1, false)) {
+					swap(array, i, i + 1);
 					newBegin = i;
 				}
 			}

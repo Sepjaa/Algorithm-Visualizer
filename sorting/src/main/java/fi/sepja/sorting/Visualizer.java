@@ -11,7 +11,7 @@ import com.jogamp.opengl.GLEventListener;
 import com.jogamp.opengl.awt.GLCanvas;
 
 /**
- * GLCanvas for drawing the array state, uses references to diffrent arrays to
+ * GLCanvas for drawing the array state, uses references to different arrays to
  * draw, which are binded with bind-methods.
  *
  * @author Jaakko
@@ -26,8 +26,9 @@ public class Visualizer extends GLCanvas implements GLEventListener {
 
 	private Object arrayDrawCopyLock = new Object();
 	private short[] array = new short[1];
-	private int[] lastSwapIndexes = { -1, -1 };
-	private int[] lastComparisonIndexes = { -1, -1 };
+	private short[] memoryArray = null;
+	private int[] lastSwapIndexes = { -1, -1, -1, -1 };
+	private int[] lastComparisonIndexes = { -1, -1, -1, -1 };
 
 	public Visualizer() {
 		this.addGLEventListener(this);
@@ -36,6 +37,14 @@ public class Visualizer extends GLCanvas implements GLEventListener {
 	public void bindArray(short[] array) {
 		synchronized (arrayDrawCopyLock) {
 			this.array = array;
+			this.memoryArray = null;
+		}
+	}
+
+	public void bindArrayWithMemory(short[] array, short[] memoryArray) {
+		synchronized (arrayDrawCopyLock) {
+			this.array = array;
+			this.memoryArray = memoryArray;
 		}
 	}
 
@@ -48,12 +57,16 @@ public class Visualizer extends GLCanvas implements GLEventListener {
 
 	public void unbindSwapAndCompareArray() {
 		synchronized (arrayDrawCopyLock) {
-			this.lastSwapIndexes = new int[2];
+			this.lastSwapIndexes = new int[4];
 			lastSwapIndexes[0] = -1;
 			lastSwapIndexes[1] = -1;
-			this.lastComparisonIndexes = new int[2];
+			lastSwapIndexes[2] = -1;
+			lastSwapIndexes[3] = -1;
+			this.lastComparisonIndexes = new int[4];
 			lastComparisonIndexes[0] = -1;
 			lastComparisonIndexes[1] = -1;
+			lastComparisonIndexes[2] = -1;
+			lastComparisonIndexes[3] = -1;
 		}
 	}
 
@@ -92,22 +105,53 @@ public class Visualizer extends GLCanvas implements GLEventListener {
 		int[] comparisonDrawCopy;
 		synchronized (arrayDrawCopyLock) {
 			drawCopy = Arrays.copyOf(array, array.length);
-			comparisonDrawCopy = Arrays.copyOf(lastComparisonIndexes, 2);
-			swapDrawCopy = Arrays.copyOf(lastSwapIndexes, 2);
+			comparisonDrawCopy = Arrays.copyOf(lastComparisonIndexes, 4);
+			swapDrawCopy = Arrays.copyOf(lastSwapIndexes, 4);
 		}
 		float width = 2f / drawCopy.length;
 		for (int i = 0; i < drawCopy.length; i++) {
-			if (i == swapDrawCopy[0] || i == swapDrawCopy[1]) {
-				gl.glColor3f(1f, 0f, 0f);
+			if (memoryArray == null) {
+				// Draw single array
+
+				if (i == swapDrawCopy[0] || i == swapDrawCopy[1]) {
+					gl.glColor3f(1f, 0f, 0f);
+				}
+				if (i == comparisonDrawCopy[0] || i == comparisonDrawCopy[1]) {
+					gl.glColor3f(0f, 0f, 1f);
+				}
+				gl.glVertex2f(i * width, drawCopy[i] * 0.002f);
+				gl.glVertex2f(i * width, 0);
+				gl.glVertex2f((i + 1) * width, 0);
+				gl.glVertex2f((i + 1) * width, drawCopy[i] * 0.002f);
+				gl.glColor3f(0f, 0f, 0f);
+			} else {
+				// Draw two arrays
+
+				if (i == swapDrawCopy[0] || i == swapDrawCopy[1]) {
+					gl.glColor3f(1f, 0f, 0f);
+				}
+				if (i == comparisonDrawCopy[0] || i == comparisonDrawCopy[1]) {
+					gl.glColor3f(0f, 0f, 1f);
+				}
+				gl.glVertex2f(i * width, array[i] * 0.001f);
+				gl.glVertex2f(i * width, 0);
+				gl.glVertex2f((i + 1) * width, 0);
+				gl.glVertex2f((i + 1) * width, array[i] * 0.001f);
+				gl.glColor3f(0f, 0f, 0f);
+
+				if (i == swapDrawCopy[2] || i == swapDrawCopy[3]) {
+					gl.glColor3f(1f, 0f, 0f);
+				}
+				if (i == comparisonDrawCopy[2] || i == comparisonDrawCopy[3]) {
+					gl.glColor3f(0f, 0f, 1f);
+				}
+
+				gl.glVertex2f(i * width, 1 + memoryArray[i] * 0.001f);
+				gl.glVertex2f(i * width, 1);
+				gl.glVertex2f((i + 1) * width, 1);
+				gl.glVertex2f((i + 1) * width, 1 + memoryArray[i] * 0.001f);
+				gl.glColor3f(0f, 0f, 0f);
 			}
-			if (i == comparisonDrawCopy[0] || i == comparisonDrawCopy[1]) {
-				gl.glColor3f(0f, 0f, 1f);
-			}
-			gl.glVertex2f(i * width, drawCopy[i] * 0.002f);
-			gl.glVertex2f(i * width, 0);
-			gl.glVertex2f((i + 1) * width, 0);
-			gl.glVertex2f((i + 1) * width, drawCopy[i] * 0.002f);
-			gl.glColor3f(0f, 0f, 0f);
 		}
 		gl.glEnd();
 	}
