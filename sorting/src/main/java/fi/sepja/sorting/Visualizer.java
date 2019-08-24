@@ -4,6 +4,7 @@ import static com.jogamp.opengl.GL.GL_COLOR_BUFFER_BIT;
 import static com.jogamp.opengl.GL2ES3.GL_QUADS;
 
 import java.util.Arrays;
+import java.util.Optional;
 
 import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GLAutoDrawable;
@@ -34,17 +35,14 @@ public class Visualizer extends GLCanvas implements GLEventListener {
 		this.addGLEventListener(this);
 	}
 
-	public void bindArray(short[] array) {
+	public void bindArrays(short[] array, Optional<short[]> memoryArray) {
 		synchronized (arrayDrawCopyLock) {
 			this.array = array;
-			this.memoryArray = null;
-		}
-	}
-
-	public void bindArrayWithMemory(short[] array, short[] memoryArray) {
-		synchronized (arrayDrawCopyLock) {
-			this.array = array;
-			this.memoryArray = memoryArray;
+			if (memoryArray.isPresent()) {
+				this.memoryArray = memoryArray.get();
+			} else {
+				this.memoryArray = null;
+			}
 		}
 	}
 

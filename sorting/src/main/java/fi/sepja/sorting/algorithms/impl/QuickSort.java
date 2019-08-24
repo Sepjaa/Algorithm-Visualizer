@@ -27,7 +27,7 @@ public class QuickSort extends AbstractAlgorithm {
 	}
 
 	@Override
-	protected void sort(short[] array, short[] memoryArray) {
+	protected void sort(short[] array) {
 		quicksort(array, 0, array.length);
 	}
 

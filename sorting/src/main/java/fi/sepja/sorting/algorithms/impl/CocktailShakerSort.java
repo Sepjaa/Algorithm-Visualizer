@@ -14,7 +14,7 @@ public class CocktailShakerSort extends AbstractAlgorithm {
 	}
 
 	@Override
-	public void sort(short[] array, short[] memoryArray) {
+	public void sort(short[] array) {
 		int begin = 0;
 		int end = array.length - 2;
 		while (begin <= end && !Thread.currentThread().isInterrupted()) {

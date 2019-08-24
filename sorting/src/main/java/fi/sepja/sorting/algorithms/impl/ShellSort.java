@@ -4,10 +4,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import fi.sepja.sorting.algorithms.AbstractAlgorithm;
+import fi.sepja.sorting.algorithms.AbstractTempValueBufferAlgorithm;
 import fi.sepja.sorting.algorithms.Algorithm;
 
-public class ShellSort extends AbstractAlgorithm {
+public class ShellSort extends AbstractTempValueBufferAlgorithm {
 
 	ShellSort() {
 		super();
@@ -28,7 +28,7 @@ public class ShellSort extends AbstractAlgorithm {
 	}
 
 	@Override
-	protected void sort(short[] array, short[] memoryArray) {
+	protected void sort(short[] array) {
 		List<Integer> gaps = new ArrayList<>();
 		int k = 1;
 		int result = 0;
@@ -44,6 +44,9 @@ public class ShellSort extends AbstractAlgorithm {
 				storeTemp(array, i);
 				int j;
 				for (j = i; j >= gap && biggerThanTemp(array, j - gap, false); j -= gap) {
+					if (Thread.currentThread().isInterrupted()) {
+						return;
+					}
 					swap(array, j, j - gap);
 				}
 				assignFromTemp(array, j);

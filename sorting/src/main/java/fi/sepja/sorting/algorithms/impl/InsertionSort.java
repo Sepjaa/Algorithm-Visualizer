@@ -1,8 +1,5 @@
 package fi.sepja.sorting.algorithms.impl;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import fi.sepja.sorting.algorithms.AbstractAlgorithm;
 import fi.sepja.sorting.algorithms.Algorithm;
 
@@ -16,10 +13,8 @@ public class InsertionSort extends AbstractAlgorithm {
 		super(comparisonSleepMicros, swapSleepMicros);
 	}
 
-	private static final Logger LOG = LoggerFactory.getLogger(InsertionSort.class);
-
 	@Override
-	public void sort(short[] array, short[] memoryArray) {
+	public void sort(short[] array) {
 		int i = 1;
 		while (i < array.length && !Thread.currentThread().isInterrupted()) {
 			int j = i;

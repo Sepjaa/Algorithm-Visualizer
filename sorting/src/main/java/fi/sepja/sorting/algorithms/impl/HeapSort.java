@@ -24,7 +24,7 @@ public class HeapSort extends AbstractAlgorithm {
 	}
 
 	@Override
-	protected void sort(short[] array, short[] memoryArray) {
+	protected void sort(short[] array) {
 		int length = array.length;
 		buildMaxHeap(array, length);
 		for (int i = length - 1; i > 0; i--) {

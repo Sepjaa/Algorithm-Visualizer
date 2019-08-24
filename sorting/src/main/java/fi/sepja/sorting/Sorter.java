@@ -1,5 +1,6 @@
 package fi.sepja.sorting;
 
+import java.util.Optional;
 import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -32,32 +33,21 @@ public class Sorter {
 	private final int[] lastSwapIndexes = { -1, -1, -1, -1 };
 	private final int[] lastComparisonIndexes = { -1, -1, -1, -1 };
 
-	public Sorter(Visualizer visualizer, int elementCount, boolean withMemoryArray, boolean tempMemory) {
+	public Sorter(Visualizer visualizer, int elementCount, Algorithm algorithm) {
 		if (elementCount <= 0) {
 			LOG.error("Invalid element count {}, set to default {}", elementCount, DEFAULT_ELEMENT_AMOUNT);
 			elementCount = DEFAULT_ELEMENT_AMOUNT;
 		}
-		if (!tempMemory) {
-			elements = new short[elementCount];
-			elementsMemory = new short[elementCount];
-		} else {
-			elements = new short[elementCount + 1];
-			elementsMemory = new short[elementCount + 1];
+		int n = elementCount + (algorithm.isTempValueBufferAlgorithm() ? 1 : 0);
+
+		elements = new short[n];
+		elementsMemory = algorithm.isFullMemoryBufferAlgorithm() ? new short[n] : null;
+
+		for (int i = 0; i < elementCount; i++) {
+			elements[i] = (short) random.nextInt(1001);
 		}
-		if (!tempMemory) {
-			for (int i = 0; i < elementCount; i++) {
-				elements[i] = (short) random.nextInt(1001);
-			}
-		} else {
-			for (int i = 0; i < elementCount; i++) {
-				elements[i] = (short) random.nextInt(1001);
-			}
-		}
-		if (withMemoryArray) {
-			visualizer.bindArrayWithMemory(elements, elementsMemory);
-		} else {
-			visualizer.bindArray(elements);
-		}
+
+		visualizer.bindArrays(elements, Optional.ofNullable(elementsMemory));
 		LOG.info("Sorter {} created with {} elements", this, elements.length);
 	}
 
@@ -87,7 +77,7 @@ public class Sorter {
 		LOG.info("{} starting sorting with {} elements", this, elements.length);
 		return executor.submit(() -> {
 			visualizer.bindCompareSwapArrays(lastComparisonIndexes, lastSwapIndexes);
-			algorithm.sort(elements, elementsMemory, lastComparisonIndexes, lastSwapIndexes);
+			algorithm.sort(elements, Optional.ofNullable(elementsMemory), lastComparisonIndexes, lastSwapIndexes);
 			visualizer.unbindSwapAndCompareArray();
 		});
 	}

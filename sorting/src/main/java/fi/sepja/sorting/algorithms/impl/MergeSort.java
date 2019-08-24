@@ -1,9 +1,9 @@
 package fi.sepja.sorting.algorithms.impl;
 
-import fi.sepja.sorting.algorithms.AbstractAlgorithm;
+import fi.sepja.sorting.algorithms.AbstractFullMemoryBufferAlgorithm;
 import fi.sepja.sorting.algorithms.Algorithm;
 
-public class MergeSort extends AbstractAlgorithm {
+public class MergeSort extends AbstractFullMemoryBufferAlgorithm {
 
 	MergeSort() {
 		super();

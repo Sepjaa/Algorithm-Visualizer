@@ -57,9 +57,12 @@ public class AlgorithmDeployment {
 		case SHELL_SORT: {
 			return new ShellSort();
 		}
+		case BUBBLE_SORT:
+			return new BubbleSort();
+		default:
+			LOG.error("Add implementation for {}", type);
+			throw new UnsupportedOperationException("No implementation for algorithm type " + type);
 		}
-		LOG.error("Add implementation for {}", type);
-		throw new UnsupportedOperationException("No implementation for algorithm type " + type);
 	}
 
 }

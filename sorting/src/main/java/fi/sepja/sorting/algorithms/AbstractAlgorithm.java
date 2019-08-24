@@ -1,5 +1,7 @@
 package fi.sepja.sorting.algorithms;
 
+import java.util.Optional;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,16 +15,12 @@ import org.slf4j.LoggerFactory;
  *
  */
 public abstract class AbstractAlgorithm implements Algorithm {
-	private static final Logger LOG = LoggerFactory.getLogger(AbstractAlgorithm.class);
-	private final int compareSleep;
-	private final int swapSleep;
+	protected final Logger LOG = LoggerFactory.getLogger(AbstractAlgorithm.class);
+	protected final int compareSleep;
+	protected final int swapSleep;
 
-	private int[] lastSwapIndexes;
-	private int[] lastComparisonIndexes;
-
-	protected boolean swap = false;
-
-	protected boolean memoryAndArraySwapped = false;
+	protected int[] lastSwapIndexes;
+	protected int[] lastComparisonIndexes;
 
 	protected AbstractAlgorithm() {
 		this.compareSleep = 0;
@@ -44,19 +42,17 @@ public abstract class AbstractAlgorithm implements Algorithm {
 		}
 	}
 
-	protected abstract void sort(short[] array, short[] memoryArray);
+	protected abstract void sort(short[] array);
 
 	@Override
-	public void sort(short[] array, short[] memoryArray, int[] lastComparisonIndexes, int[] lastSwapIndexes) {
+	public void sort(short[] array, Optional<short[]> memoryArray, int[] lastComparisonIndexes, int[] lastSwapIndexes) {
 		this.lastComparisonIndexes = lastComparisonIndexes;
 		this.lastSwapIndexes = lastSwapIndexes;
-		sort(array, memoryArray);
+		sort(array);
 	}
 
-	private void sleep(int micros) {
-		if (micros == 0) {
-
-		} else if (micros > 0) {
+	protected void sleep(int micros) {
+		if (micros > 0) {
 			final long start = System.nanoTime();
 			if (micros >= 10000) {
 				try {
@@ -101,83 +97,35 @@ public abstract class AbstractAlgorithm implements Algorithm {
 		sleep(swapSleep);
 	}
 
-	protected void copyArray(short[] array, short[] memoryArray) {
-		for (int i = 0; i < array.length; i++) {
-			if (Thread.currentThread().isInterrupted()) {
-				return;
-			}
-			memoryArray[i] = array[i];
-			lastSwap(i, i);
-			sleep(swapSleep);
-		}
-	}
-
-	/**
-	 * Copies index value from array to memoryArray.
-	 */
-	protected void copyIndexValue(short[] array, short[] memoryArray, int arrayIndex, int memoryIndex) {
-		memoryArray[memoryIndex] = array[arrayIndex];
-		lastSwap(memoryIndex, memoryIndex);
-		sleep(swapSleep);
-	}
-
-	protected void storeTemp(short[] array, int arrayIndex) {
-		array[array.length - 1] = array[arrayIndex];
-		lastSwap(array.length, arrayIndex);
-		sleep(swapSleep);
-	}
-
-	protected void assignFromTemp(short[] array, int arrayIndex) {
-		array[arrayIndex] = array[array.length - 1];
-		lastSwap(array.length, arrayIndex);
-		sleep(swapSleep);
-	}
-
-	protected void clearTemp(short[] array) {
-		array[array.length - 1] = 0;
-	}
-
-	protected boolean lessThanTemp(short[] array, int arrayIndex, boolean allowEqual) {
-		return lessThan(array, arrayIndex, array.length - 1, allowEqual);
-	}
-
-	protected boolean biggerThanTemp(short[] array, int arrayIndex, boolean allowEqual) {
-		return biggerThan(array, arrayIndex, array.length - 1, allowEqual);
-	}
-
-	private void lastSwap(int index1, int index2) {
-		if (swap) {
-			lastSwapIndexes[0] = -1;
-			lastSwapIndexes[1] = -1;
-			lastSwapIndexes[2] = index1;
-			lastSwapIndexes[3] = index2;
-		} else {
-			lastSwapIndexes[0] = index1;
-			lastSwapIndexes[1] = index2;
-			lastSwapIndexes[2] = -1;
-			lastSwapIndexes[3] = -1;
-		}
+	protected void lastSwap(int index1, int index2) {
+		lastSwapIndexes[0] = index1;
+		lastSwapIndexes[1] = index2;
+		lastSwapIndexes[2] = -1;
+		lastSwapIndexes[3] = -1;
 		lastComparisonIndexes[0] = -1;
 		lastComparisonIndexes[1] = -1;
 		lastComparisonIndexes[2] = -1;
 		lastComparisonIndexes[3] = -1;
 	}
 
-	private void lastComparison(int index1, int index2) {
-		if (swap) {
-			lastComparisonIndexes[0] = -1;
-			lastComparisonIndexes[1] = -1;
-			lastComparisonIndexes[2] = index1;
-			lastComparisonIndexes[3] = index2;
-		} else {
-			lastComparisonIndexes[0] = index1;
-			lastComparisonIndexes[1] = index2;
-			lastComparisonIndexes[2] = -1;
-			lastComparisonIndexes[3] = -1;
-		}
+	protected void lastComparison(int index1, int index2) {
+		lastComparisonIndexes[0] = index1;
+		lastComparisonIndexes[1] = index2;
+		lastComparisonIndexes[2] = -1;
+		lastComparisonIndexes[3] = -1;
 		lastSwapIndexes[0] = -1;
 		lastSwapIndexes[1] = -1;
 		lastSwapIndexes[2] = -1;
 		lastSwapIndexes[3] = -1;
+	}
+
+	@Override
+	public boolean isFullMemoryBufferAlgorithm() {
+		return false;
+	}
+
+	@Override
+	public boolean isTempValueBufferAlgorithm() {
+		return false;
 	}
 }

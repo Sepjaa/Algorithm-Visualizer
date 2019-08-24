@@ -24,7 +24,7 @@ public class SelectionSort extends AbstractAlgorithm {
 	}
 
 	@Override
-	protected void sort(short[] array, short[] memoryArray) {
+	protected void sort(short[] array) {
 		for (int i = 0; i < array.length - 1; i++) {
 			int jMin = i;
 			for (int j = i + 1; j < array.length; j++) {
