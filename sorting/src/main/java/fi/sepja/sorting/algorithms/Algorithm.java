@@ -45,7 +45,7 @@ public interface Algorithm {
 
 		INSERTION_SORT("Insertion Sort"), COCKTAIL_SHAKER_SORT("Cocktail Shaker Sort"), QUICK_SORT("Quick Sort"),
 		HEAP_SORT("Heap Sort"), MERGE_SORT("Merge Sort"), SELECTION_SORT("Selection Sort"), SHELL_SORT("Shell Sort"),
-		BUBBLE_SORT("Bubble Sort");
+		BUBBLE_SORT("Bubble Sort"), COMB_SORT("Comb Sort");
 
 		private String value;
 

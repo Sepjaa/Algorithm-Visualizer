@@ -59,6 +59,8 @@ public class AlgorithmDeployment {
 		}
 		case BUBBLE_SORT:
 			return new BubbleSort();
+		case COMB_SORT:
+			return new CombSort();
 		default:
 			LOG.error("Add implementation for {}", type);
 			throw new UnsupportedOperationException("No implementation for algorithm type " + type);
