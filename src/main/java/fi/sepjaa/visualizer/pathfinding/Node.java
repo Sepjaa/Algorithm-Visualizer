@@ -10,16 +10,22 @@ import org.slf4j.LoggerFactory;
 public class Node {
 	private static final Logger LOG = LoggerFactory.getLogger(Node.class);
 	private static final Random random = new Random();
+	private static final float NODE_BUFFER_ZONE_WIDTH = 0.05f;
 
 	private final int id;
 	private final float x, y;
 	private final List<Integer> connections;
 
-	Node(int id) {
+	Node(int id, float x, float y) {
 		this.id = id;
-		this.x = 0.05f + random.nextFloat() * 0.9f;
-		this.y = 0.05f + random.nextFloat() * 0.9f;
+		this.x = x;
+		this.y = y;
 		this.connections = new LinkedList<>();
+	}
+
+	public static Node randomInstance(int id) {
+		return new Node(id, NODE_BUFFER_ZONE_WIDTH + random.nextFloat() * (1 - 2 * NODE_BUFFER_ZONE_WIDTH),
+				NODE_BUFFER_ZONE_WIDTH + random.nextFloat() * (1 - 2 * NODE_BUFFER_ZONE_WIDTH));
 	}
 
 	void addConnection(int id) {
@@ -92,5 +98,4 @@ public class Node {
 	public String toString() {
 		return "Node [id=" + id + ", x=" + x + ", y=" + y + ", connections=" + connections + "]";
 	}
-
 }

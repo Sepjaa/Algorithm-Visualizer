@@ -7,10 +7,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.annotation.concurrent.GuardedBy;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.collect.ImmutableMap;
 
 import fi.sepjaa.visualizer.common.CommonConstants;
 
@@ -22,10 +22,11 @@ import fi.sepjaa.visualizer.common.CommonConstants;
  */
 public class PathfindingData {
 	private static final Logger LOG = LoggerFactory.getLogger(PathfindingData.class);
+	private static final float ACCEPTABLE_LOWER_THAN_AVERAGE_FACTOR = 0.8f;
+	private static final int ACCEPTABLE_SEARCH_ITERATIONS = 1000;
+	// private final Object lock = new Object();
 
-	private final Object lock = new Object();
-	@GuardedBy("lock")
-	private Map<Integer, Node> nodes;
+	private ImmutableMap<Integer, Node> nodes;
 
 	public PathfindingData(int nodeCount, int connectionsCount) {
 		if (nodeCount <= 0) {
@@ -38,13 +39,18 @@ public class PathfindingData {
 					CommonConstants.DEFAULT_PATHFINDING_CONNECTIONS_AMOUNT);
 			connectionsCount = CommonConstants.DEFAULT_PATHFINDING_CONNECTIONS_AMOUNT;
 		}
-		this.nodes = new HashMap<>();
+		this.nodes = spawnNodes(nodeCount, connectionsCount);
+
+	}
+
+	private ImmutableMap<Integer, Node> spawnNodes(int nodeCount, int connectionsCount) {
+		Map<Integer, Node> builder = new HashMap<>();
 		for (int i = 0; i < nodeCount; i++) {
-			this.nodes.put(i, new Node(i));
+			builder.put(i, spawnAcceptableNode(i, builder));
 		}
 		for (int i = 0; i < connectionsCount; i++) {
-			Node node = this.nodes.get(i % nodeCount);
-			List<Node> nodeList = new ArrayList<>(this.nodes.values());
+			Node node = builder.get(i % nodeCount);
+			List<Node> nodeList = new ArrayList<>(builder.values());
 			Collections.sort(nodeList, new Comparator<Node>() {
 				@Override
 				public int compare(Node o1, Node o2) {
@@ -61,11 +67,50 @@ public class PathfindingData {
 				n.addConnection(node.getId());
 			});
 		}
+		return ImmutableMap.copyOf(builder);
+	}
+
+	private float calcAverageClosestDistance(Map<Integer, Node> currentNodes) {
+		return (float) currentNodes.values().stream().mapToDouble(value -> {
+			return currentNodes.values().stream().filter(node -> !node.equals(value)).mapToDouble(node -> {
+				return (double) node.distanceTo(value);
+			}).min().orElse(0);
+		}).average().orElse(0);
+	}
+
+	private float findClosestDistance(Node candidate, Map<Integer, Node> currentNodes) {
+		return (float) currentNodes.values().stream().mapToDouble(value -> {
+			return candidate.distanceTo(value);
+		}).min().orElse(Double.MAX_VALUE);
+	}
+
+	private Node spawnAcceptableNode(int id, Map<Integer, Node> currentNodes) {
+		Node candidate = Node.randomInstance(id);
+		float mostDistant = 0;
+		float avgDistance = calcAverageClosestDistance(currentNodes);
+		LOG.trace("Avg distance {} at {}", avgDistance, id);
+		for (int i = 0; i < ACCEPTABLE_SEARCH_ITERATIONS; i++) {
+			// Create new node with random location
+			Node it = Node.randomInstance(id);
+			float distance = findClosestDistance(it, currentNodes);
+			if (distance > avgDistance * ACCEPTABLE_LOWER_THAN_AVERAGE_FACTOR) {
+				// Found a node that is relatively distant from all nodes
+				LOG.trace("Found acceptable node with distance {} ", avgDistance, id);
+				return it;
+			} else if (distance > mostDistant) {
+				// Save
+				mostDistant = distance;
+				candidate = it;
+				LOG.trace("Found candidate node with distance {} ", distance, id);
+			}
+		}
+		LOG.info("Exhausted acceptable iterations avg {} mostDistant {}", avgDistance, mostDistant);
+		return candidate;
 	}
 
 	public ImmutablePathfindingData getCopy() {
-		synchronized (lock) {
-			return new ImmutablePathfindingData(nodes);
-		}
+		// synchronized (lock) {
+		return new ImmutablePathfindingData(nodes);
+		// }
 	}
 }
