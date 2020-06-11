@@ -1,4 +1,4 @@
-io### Algorithm Visualizer
+# Algorithm Visualizer
 
 ### Used Versions
 Apache Maven 3.5.4
