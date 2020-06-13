@@ -56,7 +56,7 @@ public class Dijkstra implements PathfindingAlgorithm {
 		Optional<NodeDistance> next = distances.values().stream().filter(n -> !evaluated.contains(n.getNodeId()))
 				.sorted((n1, n2) -> (int) ((n1.getDistance() - n2.getDistance()) * 1000000)).findFirst();
 		Integer result = null;
-		if (next.isPresent()) {
+		if (next.isPresent() && next.get().getDistance() < Float.MAX_VALUE) {
 			result = next.get().getNodeId();
 		}
 		return Optional.ofNullable(result);
