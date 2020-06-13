@@ -6,7 +6,7 @@ package fi.sepjaa.visualizer.sorting.algorithm;
  * @author Jaakko
  *
  */
-public abstract class AbstractFullMemoryBufferAlgorithm extends AbstractAlgorithm {
+public abstract class AbstractFullMemoryBufferAlgorithm extends AbstractSortingAlgorithm {
 
 	@Override
 	public boolean isFullMemoryBufferAlgorithm() {

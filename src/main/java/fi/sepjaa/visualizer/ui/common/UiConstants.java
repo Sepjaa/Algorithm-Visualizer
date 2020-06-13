@@ -8,12 +8,13 @@ package fi.sepjaa.visualizer.ui.common;
  */
 public class UiConstants {
 
-	public static final int PREFERRED_CANVAS_WIDTH = 1920;
-	public static final int PREFERRED_CANVAS_HEIGHT = 1080;
+	public static final int PREFERRED_CANVAS_WIDTH = 1280;
+	public static final int PREFERRED_CANVAS_HEIGHT = 720;
 	public static final int FPS = 144;
 
 	public static final int NODE_DRAW_SEGMENTS = 16;
 	public static final float NODE_RADIUS = 0.01f;
+	public static final float NODE_CONNECTION_WIDTH = 0.004f;
 	public static final int AA_SAMPLES = 8;
 	public static final float SELECTION_THRESHOLD = 0.015f;
 
@@ -31,4 +32,6 @@ public class UiConstants {
 	public static final String OPERATION_SLEEP_TIMES_LBL = "Operation sleep times (μs)";
 	public static final String COMPARISON_LBL = "Comparison";
 	public static final String SWAP_LBL = "Swap";
+	public static final String MEASUREMENT_LBL = "Measure";
+	public static final String EVALUATION_LBL = "Evaluation";
 }

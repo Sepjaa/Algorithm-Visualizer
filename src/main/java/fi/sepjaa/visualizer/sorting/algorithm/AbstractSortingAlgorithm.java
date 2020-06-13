@@ -3,15 +3,12 @@ package fi.sepjaa.visualizer.sorting.algorithm;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * Base class for algorithms.
- *
- *
- * @author Jaakko
- *
- */
-public abstract class AbstractAlgorithm implements SortingAlgorithm {
-	protected final Logger LOG = LoggerFactory.getLogger(AbstractAlgorithm.class);
+public abstract class AbstractSortingAlgorithm implements SortingAlgorithm {
+	protected final Logger LOG;
+
+	public AbstractSortingAlgorithm() {
+		this.LOG = LoggerFactory.getLogger(getClass());
+	}
 
 	@Override
 	public boolean isFullMemoryBufferAlgorithm() {

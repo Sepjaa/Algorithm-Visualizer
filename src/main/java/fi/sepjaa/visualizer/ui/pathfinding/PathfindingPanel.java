@@ -1,6 +1,5 @@
 package fi.sepjaa.visualizer.ui.pathfinding;
 
-import java.awt.Color;
 import java.awt.Dimension;
 import java.util.List;
 
@@ -27,6 +26,7 @@ import fi.sepjaa.visualizer.pathfinding.PathfindingData;
 import fi.sepjaa.visualizer.pathfinding.algorithm.PathfindingAlgorithm;
 import fi.sepjaa.visualizer.pathfinding.algorithm.PathfindingAlgorithm.Type;
 import fi.sepjaa.visualizer.ui.common.AlgorithmPanel;
+import fi.sepjaa.visualizer.ui.common.PositiveIntegerVerifier;
 import fi.sepjaa.visualizer.ui.common.UiConstants;
 import net.miginfocom.swing.MigLayout;
 
@@ -43,6 +43,7 @@ public class PathfindingPanel extends AlgorithmPanel implements PathfindingNodeS
 
 	private final ImmutableMap<Type, PathfindingAlgorithm> algorithms;
 	private final ImmutableList<PathfindingDataAware> dataListeners;
+	private final JTextField measurementSleep, evaluationSleep;
 	private PathfindingData data;
 
 	@Autowired
@@ -64,7 +65,15 @@ public class PathfindingPanel extends AlgorithmPanel implements PathfindingNodeS
 		nodes.setPreferredSize(new Dimension((int) 100, nodes.getHeight()));
 
 		connections = new JTextField(String.valueOf(CommonConstants.DEFAULT_PATHFINDING_CONNECTIONS_AMOUNT));
-		connections.setPreferredSize(new Dimension((int) 100, nodes.getHeight()));
+		connections.setPreferredSize(new Dimension((int) 100, connections.getHeight()));
+
+		measurementSleep = new JTextField(String.valueOf(CommonConstants.DEFAULT_MEASUREMENT_SLEEP));
+		measurementSleep.setPreferredSize(new Dimension((int) 100, measurementSleep.getHeight()));
+		measurementSleep.setInputVerifier(new PositiveIntegerVerifier(i -> setMeasurementSleep()));
+
+		evaluationSleep = new JTextField(String.valueOf(CommonConstants.DEFAULT_EVALUATION_SLEEP));
+		evaluationSleep.setPreferredSize(new Dimension((int) 100, measurementSleep.getHeight()));
+		evaluationSleep.setInputVerifier(new PositiveIntegerVerifier(i -> setEvaluationSleep()));
 
 		validate();
 	}
@@ -88,6 +97,26 @@ public class PathfindingPanel extends AlgorithmPanel implements PathfindingNodeS
 	protected void createData() {
 		data = new PathfindingData(getNodesCount(), getConnectionsCount());
 		dataListeners.forEach(listener -> listener.bind(data));
+		setMeasurementSleep();
+		setEvaluationSleep();
+	}
+
+	private void setMeasurementSleep() {
+		try {
+			int amount = Integer.parseInt(measurementSleep.getText());
+			data.setMeasurementSleep(amount);
+		} catch (NumberFormatException e) {
+			LOG.error("Invalid value in measurement sleep");
+		}
+	}
+
+	private void setEvaluationSleep() {
+		try {
+			int amount = Integer.parseInt(evaluationSleep.getText());
+			data.setEvaluationSleep(amount);
+		} catch (NumberFormatException e) {
+			LOG.error("Invalid value in measurement sleep");
+		}
 	}
 
 	@Override
@@ -122,8 +151,7 @@ public class PathfindingPanel extends AlgorithmPanel implements PathfindingNodeS
 
 	@Override
 	protected JPanel createConfig() {
-		JPanel config = new JPanel(new MigLayout("insets 0", "[][grow, fill]", "[][]15[]"));
-		config.setBackground(Color.GRAY.brighter());
+		JPanel config = new JPanel(new MigLayout("insets 0", "[][grow, fill]", "[][]15[]15[][][]"));
 
 		config.add(new JLabel(UiConstants.NODES_LBL), "cell 0 0");
 		config.add(nodes, "cell 1 0");
@@ -133,6 +161,14 @@ public class PathfindingPanel extends AlgorithmPanel implements PathfindingNodeS
 
 		config.add(new JLabel(UiConstants.ALGORITHM_LBL), "cell 0 2");
 		config.add(algorithmSelection, "cell 1 2");
+
+		config.add(new JLabel(UiConstants.OPERATION_SLEEP_TIMES_LBL), "cell 0 3, span 2 1");
+
+		config.add(new JLabel(UiConstants.MEASUREMENT_LBL), "cell 0 4");
+		config.add(measurementSleep, "cell 1 4");
+
+		config.add(new JLabel(UiConstants.EVALUATION_LBL), "cell 0 5");
+		config.add(evaluationSleep, "cell 1 5");
 		return config;
 	}
 
@@ -141,6 +177,7 @@ public class PathfindingPanel extends AlgorithmPanel implements PathfindingNodeS
 		return () -> {
 			LOG.info("Starting to run pathfind");
 			getAlgorithm().find(data);
+			data.clearMidFindInfo();
 		};
 	}
 

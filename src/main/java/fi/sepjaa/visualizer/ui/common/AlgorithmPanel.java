@@ -1,6 +1,5 @@
 package fi.sepjaa.visualizer.ui.common;
 
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
@@ -16,11 +15,12 @@ import org.slf4j.LoggerFactory;
 
 import com.jogamp.opengl.util.FPSAnimator;
 
+import fi.sepjaa.visualizer.common.AlgorithmExecutionListener;
 import fi.sepjaa.visualizer.common.AlgorithmExecutor;
 import net.miginfocom.swing.MigLayout;
 
 @SuppressWarnings("serial")
-public abstract class AlgorithmPanel extends JPanel {
+public abstract class AlgorithmPanel extends JPanel implements AlgorithmExecutionListener {
 
 	private static final Logger LOG = LoggerFactory.getLogger(AlgorithmPanel.class);
 
@@ -33,7 +33,6 @@ public abstract class AlgorithmPanel extends JPanel {
 
 	public AlgorithmPanel(AlgorithmVisualizer visualizer, AlgorithmExecutor executor) {
 		super(new MigLayout("insets 10", "[grow, fill][]", "[grow, fill]push[]"));
-		setBackground(Color.GRAY.brighter());
 		this.visualizer = visualizer.getComponent();
 		this.executor = executor;
 		this.animator = new FPSAnimator(visualizer, UiConstants.FPS, true);
@@ -41,7 +40,6 @@ public abstract class AlgorithmPanel extends JPanel {
 
 	@PostConstruct
 	public void init() {
-		setBackground(Color.GRAY.brighter());
 
 		this.config = createConfig();
 		add(config, "cell 1 0, wrap");
@@ -53,14 +51,15 @@ public abstract class AlgorithmPanel extends JPanel {
 		this.randomize.addActionListener(e -> createData());
 		add(this.randomize, "cell 1 1, center");
 
-		visualizer.setPreferredSize(
+		this.visualizer.setPreferredSize(
 				new Dimension(UiConstants.PREFERRED_CANVAS_WIDTH, UiConstants.PREFERRED_CANVAS_HEIGHT));
-		add(visualizer, "cell 0 0, span 1 2");
+		add(this.visualizer, "cell 0 0, span 1 2");
 
 		validate();
 		createData();
 
-		animator.start();
+		this.animator.start();
+		this.executor.addListener(this);
 	}
 
 	@Override
@@ -74,14 +73,12 @@ public abstract class AlgorithmPanel extends JPanel {
 		if (animator.isStarted()) {
 			animator.stop();
 		}
+		this.executor.removeListener(this);
 	}
 
 	protected void startStopAction(ActionEvent e) {
 		if (!executor.isExecuting()) {
-			executor.start(run(), () -> {
-				setConfigEnabled(true);
-			});
-			setConfigEnabled(false);
+			executor.start(run());
 		} else {
 			executor.stop();
 		}
@@ -95,6 +92,16 @@ public abstract class AlgorithmPanel extends JPanel {
 				c.setEnabled(enabled);
 			}
 		});
+	}
+
+	@Override
+	public void onStart() {
+		setConfigEnabled(false);
+	}
+
+	@Override
+	public void onEnd(boolean canceled) {
+		setConfigEnabled(true);
 	}
 
 	public abstract String getTitle();

@@ -6,7 +6,7 @@ package fi.sepjaa.visualizer.sorting.algorithm;
  * @author Jaakko
  *
  */
-public abstract class AbstractTempValueBufferAlgorithm extends AbstractAlgorithm {
+public abstract class AbstractTempValueBufferAlgorithm extends AbstractSortingAlgorithm {
 
 	@Override
 	public boolean isTempValueBufferAlgorithm() {

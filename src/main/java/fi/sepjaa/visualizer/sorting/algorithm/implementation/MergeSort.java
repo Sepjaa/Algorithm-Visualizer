@@ -1,7 +1,5 @@
 package fi.sepjaa.visualizer.sorting.algorithm.implementation;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import fi.sepjaa.visualizer.sorting.SortingData;
@@ -9,7 +7,6 @@ import fi.sepjaa.visualizer.sorting.algorithm.AbstractFullMemoryBufferAlgorithm;
 
 @Component
 public class MergeSort extends AbstractFullMemoryBufferAlgorithm {
-	private static final Logger LOG = LoggerFactory.getLogger(MergeSort.class);
 
 	@Override
 	public Type getType() {

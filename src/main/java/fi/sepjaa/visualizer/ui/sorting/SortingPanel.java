@@ -1,6 +1,5 @@
 package fi.sepjaa.visualizer.ui.sorting;
 
-import java.awt.Color;
 import java.awt.Dimension;
 import java.util.List;
 
@@ -60,12 +59,12 @@ public class SortingPanel extends AlgorithmPanel {
 		elements.setPreferredSize(new Dimension((int) 100, elements.getHeight()));
 
 		comparisonSleep = new JTextField(String.valueOf(CommonConstants.DEFAULT_COMPARISON_SLEEP));
-		comparisonSleep.setPreferredSize(new Dimension((int) 100, elements.getHeight()));
-		comparisonSleep.setInputVerifier(new PositiveIntegerVerifier(() -> setCompareSleep()));
+		comparisonSleep.setPreferredSize(new Dimension((int) 100, comparisonSleep.getHeight()));
+		comparisonSleep.setInputVerifier(new PositiveIntegerVerifier(i -> setCompareSleep()));
 
 		swapSleep = new JTextField(String.valueOf(CommonConstants.DEFAULT_SWAP_SLEEP));
-		swapSleep.setPreferredSize(new Dimension((int) 100, elements.getHeight()));
-		swapSleep.setInputVerifier(new PositiveIntegerVerifier(() -> setSwapSleep()));
+		swapSleep.setPreferredSize(new Dimension((int) 100, swapSleep.getHeight()));
+		swapSleep.setInputVerifier(new PositiveIntegerVerifier(i -> setSwapSleep()));
 
 		algorithmSelection.addActionListener(a -> {
 			createData();
@@ -123,8 +122,7 @@ public class SortingPanel extends AlgorithmPanel {
 
 	@Override
 	protected JPanel createConfig() {
-		JPanel config = new JPanel(new MigLayout("insets 0", "[][grow, fill]", "[]15[]15[][]"));
-		config.setBackground(Color.GRAY.brighter());
+		JPanel config = new JPanel(new MigLayout("insets 0", "[][grow, fill]", "[]15[]15[][][]"));
 
 		config.add(new JLabel(UiConstants.ELEMENTS_LBL), "cell 0 0");
 		config.add(elements, "cell 1 0");

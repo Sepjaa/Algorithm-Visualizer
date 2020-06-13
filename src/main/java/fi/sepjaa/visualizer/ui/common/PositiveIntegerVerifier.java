@@ -1,6 +1,7 @@
 package fi.sepjaa.visualizer.ui.common;
 
 import java.awt.Color;
+import java.util.function.Consumer;
 
 import javax.swing.InputVerifier;
 import javax.swing.JComponent;
@@ -12,9 +13,9 @@ import org.slf4j.LoggerFactory;
 public class PositiveIntegerVerifier extends InputVerifier {
 	private static final Logger LOG = LoggerFactory.getLogger(PositiveIntegerVerifier.class);
 
-	private final Runnable onVerified;
+	private final Consumer<Integer> onVerified;
 
-	public PositiveIntegerVerifier(Runnable onVerified) {
+	public PositiveIntegerVerifier(Consumer<Integer> onVerified) {
 		this.onVerified = onVerified;
 	}
 
@@ -23,9 +24,9 @@ public class PositiveIntegerVerifier extends InputVerifier {
 		if (input instanceof JTextComponent) {
 			String text = ((JTextComponent) input).getText();
 			try {
-				Integer.parseInt(text);
+				int result = Integer.parseInt(text);
 				input.setBackground(Color.WHITE);
-				onVerified.run();
+				onVerified.accept(result);
 				return true;
 			} catch (NumberFormatException e) {
 				input.setBackground(new Color(255, 150, 150));

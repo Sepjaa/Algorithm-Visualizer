@@ -3,10 +3,10 @@ package fi.sepjaa.visualizer.sorting.algorithm.implementation;
 import org.springframework.stereotype.Component;
 
 import fi.sepjaa.visualizer.sorting.SortingData;
-import fi.sepjaa.visualizer.sorting.algorithm.AbstractAlgorithm;
+import fi.sepjaa.visualizer.sorting.algorithm.AbstractSortingAlgorithm;
 
 @Component
-public class CocktailShakerSort extends AbstractAlgorithm {
+public class CocktailShakerSort extends AbstractSortingAlgorithm {
 
 	@Override
 	public Type getType() {

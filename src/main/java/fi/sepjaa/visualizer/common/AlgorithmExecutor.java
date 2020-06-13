@@ -1,6 +1,8 @@
 package fi.sepjaa.visualizer.common;
 
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -14,17 +16,20 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 /**
- * Class to handle one algorithm execution in the application.
+ * Class to handle one algorithm execution in the application. All the algorithm
+ * executions will be ran in the single "AlgorithmExecutorThread".
  *
  * @author Jaakko
  *
  */
 @Component
-public class AlgorithmExecutor {
+public class AlgorithmExecutor implements AlgorithmExecutionEventDispatcher {
 	private static final Logger LOG = LoggerFactory.getLogger(AlgorithmExecutor.class);
 
 	private final ExecutorService executor = Executors
 			.newSingleThreadExecutor(r -> new Thread(r, "AlgorithmExecutorThread"));
+
+	private final List<AlgorithmExecutionListener> listeners = new CopyOnWriteArrayList<>();
 
 	private final Object lock = new Object();
 	@GuardedBy("lock")
@@ -68,15 +73,36 @@ public class AlgorithmExecutor {
 	/**
 	 * Starts algorithm in the executor thread and returns a future for it.
 	 */
-	public void start(Runnable runnable, Runnable callbackOnCompletion) {
+	public void start(Runnable runnable) {
 		synchronized (lock) {
 			LOG.info("{} starting", this);
 			this.execution = executor.submit(() -> {
-				LOG.info("Running new runnable");
+				dispatchStart();
 				runnable.run();
-				LOG.info("Running callback");
-				callbackOnCompletion.run();
+				dispatchEnd(false);
 			});
+		}
+	}
+
+	private void dispatchStart() {
+		LOG.info("Dispatching on start event");
+		listeners.forEach(l -> l.onStart());
+	}
+
+	private void dispatchEnd(boolean canceled) {
+		LOG.info("Dispatching on end event, canceled {}", canceled);
+		listeners.forEach(l -> l.onEnd(canceled));
+	}
+
+	@Override
+	public void addListener(AlgorithmExecutionListener listener) {
+		listeners.add(listener);
+	}
+
+	@Override
+	public void removeListener(AlgorithmExecutionListener listener) {
+		if (!listeners.remove(listener)) {
+			LOG.warn("Tried to remove listener {} from listeners but it was not registered to {}", listener, listeners);
 		}
 	}
 }

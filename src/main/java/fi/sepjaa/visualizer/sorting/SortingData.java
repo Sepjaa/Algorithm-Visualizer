@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import fi.sepjaa.visualizer.common.CommonConstants;
+import fi.sepjaa.visualizer.common.Utils;
 import fi.sepjaa.visualizer.sorting.algorithm.ImmutableSortingData;
 import fi.sepjaa.visualizer.sorting.algorithm.SortingAlgorithm;
 
@@ -78,23 +79,6 @@ public class SortingData {
 		}
 	}
 
-	private void sleep(int micros) {
-		if (micros > 0) {
-			final long start = System.nanoTime();
-			if (micros >= 10000) {
-				try {
-					Thread.sleep(micros / 1000);
-				} catch (InterruptedException e) {
-					Thread.currentThread().interrupt();
-				}
-			}
-			// Busy sleep to get accuracy over millisecond
-			while (System.nanoTime() - start < micros * 1000) {
-
-			}
-		}
-	}
-
 	// Operations
 	public boolean lessThan(int index1, int index2, boolean allowEqual) {
 		compareNext(index1, index2);
@@ -126,7 +110,7 @@ public class SortingData {
 			setNextComparison(index1, index2, CommonConstants.NO_STATEMENT, CommonConstants.NO_STATEMENT);
 			compareSleep = this.compareSleep;
 		}
-		sleep(compareSleep);
+		Utils.sleep(compareSleep);
 	}
 
 	private void compareNextInMemory(int index1, int index2) {
@@ -135,7 +119,7 @@ public class SortingData {
 			setNextComparison(CommonConstants.NO_STATEMENT, CommonConstants.NO_STATEMENT, index1, index2);
 			compareSleep = this.compareSleep;
 		}
-		sleep(compareSleep);
+		Utils.sleep(compareSleep);
 	}
 
 	public void swap(int index1, int index2) {
@@ -144,7 +128,7 @@ public class SortingData {
 			setNextSwap(index1, index2, CommonConstants.NO_STATEMENT, CommonConstants.NO_STATEMENT);
 			swapSleep = this.swapSleep;
 		}
-		sleep(swapSleep);
+		Utils.sleep(swapSleep);
 		synchronized (lock) {
 			if (index1 == index2) {
 				return;
@@ -200,7 +184,7 @@ public class SortingData {
 				swapSleep = this.swapSleep;
 				setNextSwap(i, CommonConstants.NO_STATEMENT, i, CommonConstants.NO_STATEMENT);
 			}
-			sleep(swapSleep);
+			Utils.sleep(swapSleep);
 			synchronized (lock) {
 				elementsMemory[i] = elements[i];
 			}
@@ -227,7 +211,7 @@ public class SortingData {
 			swapSleep = this.swapSleep;
 			setNextSwap(index, CommonConstants.NO_STATEMENT, memoryIndex, CommonConstants.NO_STATEMENT);
 		}
-		sleep(swapSleep);
+		Utils.sleep(swapSleep);
 	}
 
 	public void storeTemp(int index) {
@@ -256,7 +240,7 @@ public class SortingData {
 			swapSleep = this.swapSleep;
 			setNextSwap(index, elements.length - 1, CommonConstants.NO_STATEMENT, CommonConstants.NO_STATEMENT);
 		}
-		sleep(swapSleep);
+		Utils.sleep(swapSleep);
 	}
 
 	public boolean lessThanTemp(int index, boolean allowEqual) {
@@ -277,10 +261,9 @@ public class SortingData {
 		int comparisonSleep;
 		synchronized (lock) {
 			comparisonSleep = this.swapSleep;
-			setNextComparison(index, elements.length - 1, CommonConstants.NO_STATEMENT,
-					CommonConstants.NO_STATEMENT);
+			setNextComparison(index, elements.length - 1, CommonConstants.NO_STATEMENT, CommonConstants.NO_STATEMENT);
 		}
-		sleep(comparisonSleep);
+		Utils.sleep(comparisonSleep);
 	}
 
 }

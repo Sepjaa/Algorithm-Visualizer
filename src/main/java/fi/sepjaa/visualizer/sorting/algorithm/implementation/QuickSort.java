@@ -5,10 +5,10 @@ import java.util.Random;
 import org.springframework.stereotype.Component;
 
 import fi.sepjaa.visualizer.sorting.SortingData;
-import fi.sepjaa.visualizer.sorting.algorithm.AbstractAlgorithm;
+import fi.sepjaa.visualizer.sorting.algorithm.AbstractSortingAlgorithm;
 
 @Component
-public class QuickSort extends AbstractAlgorithm {
+public class QuickSort extends AbstractSortingAlgorithm {
 	private final Random random = new Random();
 
 	@Override

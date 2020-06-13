@@ -8,9 +8,12 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import fi.sepjaa.visualizer.common.AlgorithmExecutor;
 import fi.sepjaa.visualizer.pathfinding.Node;
+import fi.sepjaa.visualizer.pathfinding.NodeUtilities;
 import fi.sepjaa.visualizer.pathfinding.PathfindingData;
 import fi.sepjaa.visualizer.ui.common.UiConstants;
 
@@ -26,6 +29,12 @@ public class NodeSelectionManager implements PathfindingVisualizerMouseListener,
 	private static final Logger LOG = LoggerFactory.getLogger(NodeSelectionManager.class);
 
 	private final List<PathfindingNodeSelectionListener> listeners = new CopyOnWriteArrayList<>();
+	private final AlgorithmExecutor executor;
+
+	@Autowired
+	public NodeSelectionManager(AlgorithmExecutor executor) {
+		this.executor = executor;
+	}
 
 	private int width;
 	private int height;
@@ -54,12 +63,15 @@ public class NodeSelectionManager implements PathfindingVisualizerMouseListener,
 
 	@Override
 	public synchronized void mouseReleased(MouseEvent e) {
+		if (executor.isExecuting()) {
+			executor.stop();
+		}
 		Point jCoordinates = e.getPoint();
 		float glX = jCoordinates.x / (float) width;
 		float glY = (height - jCoordinates.y) / (float) height;
 		LOG.info("Clicked point {} resulting in x {}, y {}", e.getPoint(), glX, glY);
 		if (data != null) {
-			Optional<Node> nodeCloseEnough = PathfindingData
+			Optional<Node> nodeCloseEnough = NodeUtilities
 					.getClosestNode(glX, glY, this.data.getCopy().getNodes().values())
 					.filter(n -> new Node(-1, glX, glY).distanceTo(n) <= UiConstants.SELECTION_THRESHOLD);
 			LOG.info("Node close enough {}", nodeCloseEnough);
