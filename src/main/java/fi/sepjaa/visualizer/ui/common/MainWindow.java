@@ -1,8 +1,14 @@
 package fi.sepjaa.visualizer.ui.common;
 
+import java.awt.Frame;
+import java.awt.Image;
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
+import javax.imageio.ImageIO;
 import javax.swing.JFrame;
 import javax.swing.JTabbedPane;
 
@@ -42,6 +48,19 @@ public class MainWindow extends JFrame implements ApplicationContextAware {
 	@PostConstruct
 	public void init() {
 		LOG.info("Showing main window with {} panels", this.panels.size());
+		try {
+			URL resource = getClass().getClassLoader().getResource("icon.png");
+			if (resource != null) {
+				File iconFile = new File(resource.getFile());
+				Image image = ImageIO.read(iconFile);
+				setIconImage(image);
+			} else {
+				LOG.warn("No icon.png found from resources");
+			}
+		} catch (IOException e) {
+			LOG.warn("Setting icon failed", e);
+		}
+
 		setLayout(new MigLayout("insets 0", "[grow, fill]", "[grow, fill]"));
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
@@ -51,8 +70,9 @@ public class MainWindow extends JFrame implements ApplicationContextAware {
 		});
 		add(tabbedPane);
 		setTitle(UiConstants.TITLE);
-		pack();
+		setExtendedState(Frame.MAXIMIZED_BOTH);
 		setVisible(true);
+
 	}
 
 	@Override
