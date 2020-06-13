@@ -65,8 +65,14 @@ public class PathfindingData {
 
 	private ImmutableMap<Integer, Node> spawnNodes(int nodeCount, int connectionsCount) {
 		Map<Integer, Node> builder = new HashMap<>();
+		float averageDistance = 0.5f;
+		int refreshDistanceAt = 2;
 		for (int i = 0; i < nodeCount; i++) {
-			builder.put(i, spawnAcceptableNode(i, builder));
+			if (i > refreshDistanceAt) {
+				refreshDistanceAt *= 2;
+				averageDistance = calcAverageClosestDistance(builder.values());
+			}
+			builder.put(i, spawnAcceptableNode(i, builder, averageDistance));
 		}
 		for (int i = 0; i < connectionsCount; i++) {
 			Node node = builder.get(i % nodeCount);
@@ -98,10 +104,9 @@ public class PathfindingData {
 		}).min().orElse(Double.MAX_VALUE);
 	}
 
-	private static Node spawnAcceptableNode(int id, Map<Integer, Node> currentNodes) {
+	private static Node spawnAcceptableNode(int id, Map<Integer, Node> currentNodes, float avgDistance) {
 		Node candidate = Node.randomInstance(id);
 		float mostDistant = 0;
-		float avgDistance = calcAverageClosestDistance(currentNodes.values());
 		LOG.trace("Avg distance {} at {}", avgDistance, id);
 		for (int i = 0; i < ACCEPTABLE_SEARCH_ITERATIONS; i++) {
 			// Create new node with random location
