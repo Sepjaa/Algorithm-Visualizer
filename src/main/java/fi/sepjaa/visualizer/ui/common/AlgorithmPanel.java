@@ -29,7 +29,7 @@ public abstract class AlgorithmPanel extends JPanel {
 	private final AlgorithmExecutor executor;
 
 	private JPanel config;
-	private JButton startStop, randomize;
+	protected JButton startStop, randomize;
 
 	public AlgorithmPanel(AlgorithmVisualizer visualizer, AlgorithmExecutor executor) {
 		super(new MigLayout("insets 10", "[grow, fill][]", "[grow, fill]push[]"));
@@ -42,9 +42,6 @@ public abstract class AlgorithmPanel extends JPanel {
 	@PostConstruct
 	public void init() {
 		setBackground(Color.GRAY.brighter());
-		visualizer.setPreferredSize(
-				new Dimension(UiConstants.PREFERRED_CANVAS_WIDTH, UiConstants.PREFERRED_CANVAS_HEIGHT));
-		add(visualizer, "cell 0 0, span 1 2");
 
 		this.config = createConfig();
 		add(config, "cell 1 0, wrap");
@@ -55,6 +52,11 @@ public abstract class AlgorithmPanel extends JPanel {
 		this.randomize = new JButton(UiConstants.RANDOMIZE_LBL);
 		this.randomize.addActionListener(e -> createData());
 		add(this.randomize, "cell 1 1, center");
+
+		visualizer.setPreferredSize(
+				new Dimension(UiConstants.PREFERRED_CANVAS_WIDTH, UiConstants.PREFERRED_CANVAS_HEIGHT));
+		add(visualizer, "cell 0 0, span 1 2");
+
 		validate();
 		createData();
 

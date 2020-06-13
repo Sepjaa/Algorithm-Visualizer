@@ -27,9 +27,11 @@ public class SortingData {
 	@GuardedBy("lock")
 	private final short[] elementsMemory;
 	@GuardedBy("lock")
-	private final int[] swapIndexes = { -1, -1, -1, -1 };
+	private final int[] swapIndexes = { CommonConstants.NO_STATEMENT, CommonConstants.NO_STATEMENT,
+			CommonConstants.NO_STATEMENT, CommonConstants.NO_STATEMENT };
 	@GuardedBy("lock")
-	private final int[] comparisonIndexes = { -1, -1, -1, -1 };
+	private final int[] comparisonIndexes = { CommonConstants.NO_STATEMENT, CommonConstants.NO_STATEMENT,
+			CommonConstants.NO_STATEMENT, CommonConstants.NO_STATEMENT };
 	@GuardedBy("lock")
 	private int swapSleep = CommonConstants.DEFAULT_SWAP_SLEEP;
 	@GuardedBy("lock")
@@ -121,7 +123,7 @@ public class SortingData {
 	private void compareNext(int index1, int index2) {
 		int compareSleep;
 		synchronized (lock) {
-			setNextComparison(index1, index2, -1, -1);
+			setNextComparison(index1, index2, CommonConstants.NO_STATEMENT, CommonConstants.NO_STATEMENT);
 			compareSleep = this.compareSleep;
 		}
 		sleep(compareSleep);
@@ -130,7 +132,7 @@ public class SortingData {
 	private void compareNextInMemory(int index1, int index2) {
 		int compareSleep;
 		synchronized (lock) {
-			setNextComparison(-1, -1, index1, index2);
+			setNextComparison(CommonConstants.NO_STATEMENT, CommonConstants.NO_STATEMENT, index1, index2);
 			compareSleep = this.compareSleep;
 		}
 		sleep(compareSleep);
@@ -139,7 +141,7 @@ public class SortingData {
 	public void swap(int index1, int index2) {
 		int swapSleep;
 		synchronized (lock) {
-			setNextSwap(index1, index2, -1, -1);
+			setNextSwap(index1, index2, CommonConstants.NO_STATEMENT, CommonConstants.NO_STATEMENT);
 			swapSleep = this.swapSleep;
 		}
 		sleep(swapSleep);
@@ -155,14 +157,14 @@ public class SortingData {
 
 	public void clearNexts() {
 		synchronized (lock) {
-			swapIndexes[0] = -1;
-			swapIndexes[1] = -1;
-			swapIndexes[2] = -1;
-			swapIndexes[3] = -1;
-			comparisonIndexes[0] = -1;
-			comparisonIndexes[1] = -1;
-			comparisonIndexes[2] = -1;
-			comparisonIndexes[3] = -1;
+			swapIndexes[0] = CommonConstants.NO_STATEMENT;
+			swapIndexes[1] = CommonConstants.NO_STATEMENT;
+			swapIndexes[2] = CommonConstants.NO_STATEMENT;
+			swapIndexes[3] = CommonConstants.NO_STATEMENT;
+			comparisonIndexes[0] = CommonConstants.NO_STATEMENT;
+			comparisonIndexes[1] = CommonConstants.NO_STATEMENT;
+			comparisonIndexes[2] = CommonConstants.NO_STATEMENT;
+			comparisonIndexes[3] = CommonConstants.NO_STATEMENT;
 		}
 	}
 
@@ -171,10 +173,10 @@ public class SortingData {
 		swapIndexes[1] = index1;
 		swapIndexes[2] = index2;
 		swapIndexes[3] = index3;
-		comparisonIndexes[0] = -1;
-		comparisonIndexes[1] = -1;
-		comparisonIndexes[2] = -1;
-		comparisonIndexes[3] = -1;
+		comparisonIndexes[0] = CommonConstants.NO_STATEMENT;
+		comparisonIndexes[1] = CommonConstants.NO_STATEMENT;
+		comparisonIndexes[2] = CommonConstants.NO_STATEMENT;
+		comparisonIndexes[3] = CommonConstants.NO_STATEMENT;
 	}
 
 	private void setNextComparison(int index0, int index1, int index2, int index3) {
@@ -182,10 +184,10 @@ public class SortingData {
 		comparisonIndexes[1] = index1;
 		comparisonIndexes[2] = index2;
 		comparisonIndexes[3] = index3;
-		swapIndexes[0] = -1;
-		swapIndexes[1] = -1;
-		swapIndexes[2] = -1;
-		swapIndexes[3] = -1;
+		swapIndexes[0] = CommonConstants.NO_STATEMENT;
+		swapIndexes[1] = CommonConstants.NO_STATEMENT;
+		swapIndexes[2] = CommonConstants.NO_STATEMENT;
+		swapIndexes[3] = CommonConstants.NO_STATEMENT;
 	}
 
 	public void copyArrayToMemory() {
@@ -196,7 +198,7 @@ public class SortingData {
 			int swapSleep;
 			synchronized (lock) {
 				swapSleep = this.swapSleep;
-				setNextSwap(i, -1, i, -1);
+				setNextSwap(i, CommonConstants.NO_STATEMENT, i, CommonConstants.NO_STATEMENT);
 			}
 			sleep(swapSleep);
 			synchronized (lock) {
@@ -223,7 +225,7 @@ public class SortingData {
 		int swapSleep;
 		synchronized (lock) {
 			swapSleep = this.swapSleep;
-			setNextSwap(index, -1, memoryIndex, -1);
+			setNextSwap(index, CommonConstants.NO_STATEMENT, memoryIndex, CommonConstants.NO_STATEMENT);
 		}
 		sleep(swapSleep);
 	}
@@ -252,7 +254,7 @@ public class SortingData {
 		int swapSleep;
 		synchronized (lock) {
 			swapSleep = this.swapSleep;
-			setNextSwap(index, elements.length - 1, -1, -1);
+			setNextSwap(index, elements.length - 1, CommonConstants.NO_STATEMENT, CommonConstants.NO_STATEMENT);
 		}
 		sleep(swapSleep);
 	}
@@ -275,7 +277,8 @@ public class SortingData {
 		int comparisonSleep;
 		synchronized (lock) {
 			comparisonSleep = this.swapSleep;
-			setNextComparison(index, elements.length - 1, -1, -1);
+			setNextComparison(index, elements.length - 1, CommonConstants.NO_STATEMENT,
+					CommonConstants.NO_STATEMENT);
 		}
 		sleep(comparisonSleep);
 	}

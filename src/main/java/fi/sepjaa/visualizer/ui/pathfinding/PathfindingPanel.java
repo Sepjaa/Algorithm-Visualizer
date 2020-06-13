@@ -4,20 +4,25 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.util.List;
 
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
 import fi.sepjaa.visualizer.common.AlgorithmExecutor;
 import fi.sepjaa.visualizer.common.CommonConstants;
+import fi.sepjaa.visualizer.pathfinding.ImmutablePathfindingData;
 import fi.sepjaa.visualizer.pathfinding.PathfindingData;
 import fi.sepjaa.visualizer.pathfinding.algorithm.PathfindingAlgorithm;
 import fi.sepjaa.visualizer.pathfinding.algorithm.PathfindingAlgorithm.Type;
@@ -27,24 +32,26 @@ import net.miginfocom.swing.MigLayout;
 
 @SuppressWarnings("serial")
 @Component
-public class PathfindingPanel extends AlgorithmPanel {
+public class PathfindingPanel extends AlgorithmPanel implements PathfindingNodeSelectionListener {
 
 	private static final Logger LOG = LoggerFactory.getLogger(PathfindingPanel.class);
+
+	private final NodeSelectionUpdateDispatcher dispatcher;
 
 	private final JTextField nodes, connections;
 	private final JComboBox<Type> algorithmSelection;
 
-	private final PathfindingVisualizer visualizer;
-
 	private final ImmutableMap<Type, PathfindingAlgorithm> algorithms;
-
+	private final ImmutableList<PathfindingDataAware> dataListeners;
 	private PathfindingData data;
 
 	@Autowired
 	public PathfindingPanel(PathfindingVisualizer visualizer, List<PathfindingAlgorithm> algorithms,
-			AlgorithmExecutor executor) {
+			AlgorithmExecutor executor, List<PathfindingDataAware> dataListeners,
+			NodeSelectionUpdateDispatcher dispatcher) {
 		super(visualizer, executor);
-		this.visualizer = visualizer;
+		this.dispatcher = dispatcher;
+		this.dataListeners = ImmutableList.copyOf(dataListeners);
 		algorithmSelection = new JComboBox<>();
 		ImmutableMap.Builder<Type, PathfindingAlgorithm> builder = new ImmutableMap.Builder<>();
 		for (PathfindingAlgorithm alg : algorithms) {
@@ -63,9 +70,24 @@ public class PathfindingPanel extends AlgorithmPanel {
 	}
 
 	@Override
+	@PostConstruct
+	public void init() {
+		super.init();
+		startStop.setEnabled(false);
+		dispatcher.addListener(this);
+	}
+
+	@Override
+	@PreDestroy
+	public void destroy() {
+		super.destroy();
+		dispatcher.removeListener(this);
+	}
+
+	@Override
 	protected void createData() {
 		data = new PathfindingData(getNodesCount(), getConnectionsCount());
-		visualizer.bind(data);
+		dataListeners.forEach(listener -> listener.bind(data));
 	}
 
 	@Override
@@ -120,6 +142,15 @@ public class PathfindingPanel extends AlgorithmPanel {
 	@Override
 	protected Runnable run() {
 		throw new UnsupportedOperationException("No implementation for pathfind.");
+	}
+
+	@Override
+	public void selectionChanged(ImmutablePathfindingData newData) {
+		if (newData.getStart() != CommonConstants.NO_STATEMENT && newData.getEnd() != CommonConstants.NO_STATEMENT) {
+			SwingUtilities.invokeLater(() -> startStop.setEnabled(true));
+		} else {
+			SwingUtilities.invokeLater(() -> startStop.setEnabled(false));
+		}
 	}
 
 }
