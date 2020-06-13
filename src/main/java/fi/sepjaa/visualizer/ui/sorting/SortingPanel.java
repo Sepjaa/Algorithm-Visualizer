@@ -123,21 +123,21 @@ public class SortingPanel extends AlgorithmPanel {
 
 	@Override
 	protected JPanel createConfig() {
-		JPanel config = new JPanel(new MigLayout("insets 0", "[][grow, fill]", "[]15[][][]"));
+		JPanel config = new JPanel(new MigLayout("insets 0", "[][grow, fill]", "[]15[]15[][]"));
 		config.setBackground(Color.GRAY.brighter());
 
-		config.add(new JLabel("Elements"), "cell 0 0");
+		config.add(new JLabel(UiConstants.ELEMENTS_LBL), "cell 0 0");
 		config.add(elements, "cell 1 0");
 
-		config.add(new JLabel("Algorithm"), "cell 0 1");
+		config.add(new JLabel(UiConstants.ALGORITHM_LBL), "cell 0 1");
 		config.add(algorithmSelection, "cell 1 1");
 
-		config.add(new JLabel("Operation sleep times (μs)"), "cell 0 2, span 2 1");
+		config.add(new JLabel(UiConstants.OPERATION_SLEEP_TIMES_LBL), "cell 0 2, span 2 1");
 
-		config.add(new JLabel("Comparison"), "cell 0 3");
+		config.add(new JLabel(UiConstants.COMPARISON_LBL), "cell 0 3");
 		config.add(comparisonSleep, "cell 1 3");
 
-		config.add(new JLabel("Swap"), "cell 0 4");
+		config.add(new JLabel(UiConstants.SWAP_LBL), "cell 0 4");
 		config.add(swapSleep, "cell 1 4");
 		return config;
 	}

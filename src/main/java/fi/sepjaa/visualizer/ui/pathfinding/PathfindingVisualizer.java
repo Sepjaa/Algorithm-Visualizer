@@ -97,6 +97,7 @@ public class PathfindingVisualizer extends GLCanvasVisualizer implements Pathfin
 		}
 
 		Map<Integer, Node> nodes = copy.getNodes();
+		List<Integer> path = copy.getPath();
 
 		GL2 gl = drawable.getGL().getGL2();
 		gl.glClear(GL_COLOR_BUFFER_BIT);
@@ -108,6 +109,11 @@ public class PathfindingVisualizer extends GLCanvasVisualizer implements Pathfin
 		gl.glBegin(GL_LINES);
 		for (Node n : nodes.values()) {
 			n.getConnections().forEach(id -> {
+				if (path.contains(n.getId()) && path.contains(id)) {
+					gl.glColor3f(0f, 1f, 0f);
+				} else {
+					gl.glColor3f(0f, 0f, 0f);
+				}
 				gl.glVertex2f(n.getX() * 2, n.getY() * 2);
 				Node connection = nodes.get(id);
 				gl.glVertex2f(connection.getX() * 2, connection.getY() * 2);
@@ -115,17 +121,21 @@ public class PathfindingVisualizer extends GLCanvasVisualizer implements Pathfin
 		}
 		gl.glEnd();
 		for (Node n : nodes.values()) {
-			drawNode(gl, n.getX() * 2, n.getY() * 2, n.getId() == copy.getStart(), n.getId() == copy.getEnd());
+			drawNode(gl, n.getX() * 2, n.getY() * 2, n.getId() == copy.getStart(), n.getId() == copy.getEnd(),
+					path.contains(n.getId()));
 		}
 	}
 
-	void drawNode(GL2 gl, float x, float y, boolean start, boolean end) {
+	void drawNode(GL2 gl, float x, float y, boolean start, boolean end, boolean onPath) {
 		gl.glBegin(GL_TRIANGLE_FAN);
+		if (onPath) {
+			gl.glColor3f(0f, 1f, 0f);
+		}
 		if (start) {
 			gl.glColor3f(1f, 0f, 0f);
 		} else if (end) {
 			gl.glColor3f(0f, 0f, 1f);
-		} else {
+		} else if (!onPath) {
 			gl.glColor3f(0f, 0f, 0f);
 		}
 		{

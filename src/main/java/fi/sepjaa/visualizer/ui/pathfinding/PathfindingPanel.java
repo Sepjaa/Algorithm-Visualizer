@@ -92,13 +92,7 @@ public class PathfindingPanel extends AlgorithmPanel implements PathfindingNodeS
 
 	@Override
 	public String getTitle() {
-		return UiConstants.PATHFINDING_TITLE;
-	}
-
-	@Override
-	public void removeNotify() {
-		destroy();
-		super.removeNotify();
+		return UiConstants.PATHFINDING_TAB_TITLE;
 	}
 
 	private PathfindingAlgorithm getAlgorithm() {
@@ -128,20 +122,26 @@ public class PathfindingPanel extends AlgorithmPanel implements PathfindingNodeS
 
 	@Override
 	protected JPanel createConfig() {
-		JPanel config = new JPanel(new MigLayout("insets 0", "[][grow, fill]", "[][]"));
+		JPanel config = new JPanel(new MigLayout("insets 0", "[][grow, fill]", "[][]15[]"));
 		config.setBackground(Color.GRAY.brighter());
 
-		config.add(new JLabel("Nodes "), "cell 0 0");
+		config.add(new JLabel(UiConstants.NODES_LBL), "cell 0 0");
 		config.add(nodes, "cell 1 0");
 
-		config.add(new JLabel("Connections"), "cell 0 1");
+		config.add(new JLabel(UiConstants.CONNECTIONS_LBL), "cell 0 1");
 		config.add(connections, "cell 1 1");
+
+		config.add(new JLabel(UiConstants.ALGORITHM_LBL), "cell 0 2");
+		config.add(algorithmSelection, "cell 1 2");
 		return config;
 	}
 
 	@Override
 	protected Runnable run() {
-		throw new UnsupportedOperationException("No implementation for pathfind.");
+		return () -> {
+			LOG.info("Starting to run pathfind");
+			getAlgorithm().find(data);
+		};
 	}
 
 	@Override

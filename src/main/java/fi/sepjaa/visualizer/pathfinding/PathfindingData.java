@@ -13,6 +13,7 @@ import javax.annotation.concurrent.GuardedBy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
 import fi.sepjaa.visualizer.common.CommonConstants;
@@ -35,6 +36,8 @@ public class PathfindingData {
 	private int start = CommonConstants.NO_STATEMENT;
 	@GuardedBy("lock")
 	private int end = CommonConstants.NO_STATEMENT;
+	@GuardedBy("lock")
+	private List<Integer> path = ImmutableList.of();
 
 	public PathfindingData(int nodeCount, int connectionsCount) {
 		if (nodeCount <= 0) {
@@ -121,29 +124,48 @@ public class PathfindingData {
 
 	public ImmutablePathfindingData getCopy() {
 		synchronized (lock) {
-			return new ImmutablePathfindingData(nodes, start, end);
+			return new ImmutablePathfindingData(nodes, start, end, path);
+		}
+	}
+
+	private void setStart(int start) {
+		synchronized (lock) {
+			this.start = start;
+		}
+	}
+
+	private void setEnd(int end) {
+		synchronized (lock) {
+			this.end = end;
 		}
 	}
 
 	public void setSelected(int id) {
 		synchronized (lock) {
 			if (start == CommonConstants.NO_STATEMENT) {
-				start = id;
+				setStart(id);
 			} else if (end == CommonConstants.NO_STATEMENT) {
 				if (start != id) {
-					end = id;
+					setEnd(id);
 				}
 			} else {
 				clearSelections();
-				start = id;
+				setStart(id);
 			}
 		}
 	}
 
 	public void clearSelections() {
 		synchronized (lock) {
-			start = CommonConstants.NO_STATEMENT;
-			end = CommonConstants.NO_STATEMENT;
+			setStart(CommonConstants.NO_STATEMENT);
+			setEnd(CommonConstants.NO_STATEMENT);
+			setPath(ImmutableList.of());
+		}
+	}
+
+	public void setPath(List<Integer> path) {
+		synchronized (lock) {
+			this.path = ImmutableList.copyOf(path);
 		}
 	}
 }

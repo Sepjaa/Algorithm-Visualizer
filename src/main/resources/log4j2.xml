@@ -10,10 +10,10 @@
 		<Root level="INFO">
 			<AppenderRef ref="Console" />
 		</Root>
-		<!-- 
-		<Logger name="fi.sepjaa.visualizer.pathfinding.PathfindingData" level="TRACE">
+		
+		<Logger name="fi.sepjaa.visualizer.ui.pathfinding.algorithm.implementation" level="TRACE">
 			<AppenderRef ref="Console" />
 		</Logger>
-		-->
+		
 	</Loggers>
 </Configuration>

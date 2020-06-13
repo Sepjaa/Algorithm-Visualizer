@@ -20,14 +20,6 @@ public interface SortingAlgorithm {
 	 */
 	Type getType();
 
-	/**
-	 * Enum containing all the available algorithm types. Algorithms can be added by
-	 * adding values to this and providing an implementation for them in
-	 * {@link SortingDeployment}.
-	 *
-	 * @author Jaakko
-	 *
-	 */
 	public enum Type {
 
 		INSERTION_SORT("Insertion Sort"), COCKTAIL_SHAKER_SORT("Cocktail Shaker Sort"), QUICK_SORT("Quick Sort"),

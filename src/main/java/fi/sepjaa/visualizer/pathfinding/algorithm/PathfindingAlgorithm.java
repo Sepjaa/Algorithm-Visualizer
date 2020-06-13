@@ -15,8 +15,7 @@ public interface PathfindingAlgorithm {
 	Type getType();
 
 	public enum Type {
-		// TODO: actual types
-		TEMP("TODO");
+		DIJKSTRA("Dijkstra");
 
 		private String value;
 

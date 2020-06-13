@@ -1,6 +1,5 @@
 package fi.sepjaa.visualizer.ui.common;
 
-import java.awt.Frame;
 import java.awt.Image;
 import java.io.File;
 import java.io.IOException;
@@ -69,8 +68,9 @@ public class MainWindow extends JFrame implements ApplicationContextAware {
 			tabbedPane.addTab(panel.getTitle(), panel);
 		});
 		add(tabbedPane);
-		setTitle(UiConstants.TITLE);
-		setExtendedState(Frame.MAXIMIZED_BOTH);
+		setTitle(UiConstants.APPLICATION_TITLE);
+		pack();
+		// setExtendedState(Frame.MAXIMIZED_BOTH);
 		setVisible(true);
 
 	}
