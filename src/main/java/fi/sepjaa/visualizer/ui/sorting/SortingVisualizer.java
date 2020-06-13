@@ -11,6 +11,7 @@ import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GLAutoDrawable;
 
 import fi.sepjaa.visualizer.sorting.SortingData;
+import fi.sepjaa.visualizer.sorting.SortingOperationIndexes;
 import fi.sepjaa.visualizer.sorting.algorithm.ImmutableSortingData;
 import fi.sepjaa.visualizer.ui.common.GLCanvasVisualizer;
 
@@ -24,7 +25,7 @@ import fi.sepjaa.visualizer.ui.common.GLCanvasVisualizer;
 @SuppressWarnings("serial")
 @Component
 public class SortingVisualizer extends GLCanvasVisualizer {
-
+	private static final float BAR_MAX_HEIGHT = 0.002f;
 	private final Object lock = new Object();
 	@GuardedBy("lock")
 	private SortingData data;
@@ -63,6 +64,10 @@ public class SortingVisualizer extends GLCanvasVisualizer {
 			copy = this.data.getCopy();
 			drawMemoryCopy = this.drawMemory;
 		}
+
+		SortingOperationIndexes swaps = copy.getSwapIndexes();
+		SortingOperationIndexes comparisons = copy.getComparisonIndexes();
+
 		GL2 gl = drawable.getGL().getGL2();
 		gl.glClear(GL_COLOR_BUFFER_BIT);
 		gl.glLoadIdentity();
@@ -72,48 +77,47 @@ public class SortingVisualizer extends GLCanvasVisualizer {
 		gl.glColor3f(0f, 0f, 0f);
 		float width = 2f / copy.getLength();
 		for (int i = 0; i < copy.getLength(); i++) {
-			if (!drawMemoryCopy) {
-				// Draw single array
+			float arrayHeight = BAR_MAX_HEIGHT;
+			if (drawMemoryCopy) {
+				arrayHeight /= 2;
+			}
+			if (swaps.inArray(i)) {
+				gl.glColor3f(1f, 0f, 0f);
+			} else if (comparisons.inArray(i)) {
+				gl.glColor3f(0f, 0f, 1f);
+			}
+			gl.glVertex2f(i * width, copy.getElements()[i] * arrayHeight);
+			gl.glVertex2f(i * width, 0);
+			gl.glVertex2f((i + 1) * width, 0);
+			gl.glVertex2f((i + 1) * width, copy.getElements()[i] * arrayHeight);
+			gl.glColor3f(0f, 0f, 0f);
 
-				if (i == copy.getSwapIndexes()[0] || i == copy.getSwapIndexes()[1]) {
-					gl.glColor3f(1f, 0f, 0f);
-				}
-				if (i == copy.getComparisonIndexes()[0] || i == copy.getComparisonIndexes()[1]) {
-					gl.glColor3f(0f, 0f, 1f);
-				}
-				gl.glVertex2f(i * width, copy.getElements()[i] * 0.002f);
-				gl.glVertex2f(i * width, 0);
-				gl.glVertex2f((i + 1) * width, 0);
-				gl.glVertex2f((i + 1) * width, copy.getElements()[i] * 0.002f);
-				gl.glColor3f(0f, 0f, 0f);
-			} else {
+			if (drawMemoryCopy) {
 				// Draw two arrays
-
-				if (i == copy.getSwapIndexes()[0] || i == copy.getSwapIndexes()[1]) {
+				if (swaps.inArray(i)) {
 					gl.glColor3f(1f, 0f, 0f);
-				}
-				if (i == copy.getComparisonIndexes()[0] || i == copy.getComparisonIndexes()[1]) {
+				} else if (comparisons.inArray(i)) {
 					gl.glColor3f(0f, 0f, 1f);
 				}
-				gl.glVertex2f(i * width, copy.getElements()[i] * 0.001f);
+				gl.glVertex2f(i * width, copy.getElements()[i] * arrayHeight);
 				gl.glVertex2f(i * width, 0);
 				gl.glVertex2f((i + 1) * width, 0);
-				gl.glVertex2f((i + 1) * width, copy.getElements()[i] * 0.001f);
+				gl.glVertex2f((i + 1) * width, copy.getElements()[i] * arrayHeight);
 				gl.glColor3f(0f, 0f, 0f);
 
-				if (i == copy.getSwapIndexes()[2] || i == copy.getSwapIndexes()[3]) {
+				if (swaps.inMemory(i)) {
 					gl.glColor3f(1f, 0f, 0f);
-				}
-				if (i == copy.getComparisonIndexes()[2] || i == copy.getComparisonIndexes()[3]) {
+				} else if (comparisons.inMemory(i)) {
 					gl.glColor3f(0f, 0f, 1f);
 				}
 
-				gl.glVertex2f(i * width, 1 + copy.getElementsMemory()[i] * 0.001f);
+				gl.glVertex2f(i * width, 1 + copy.getElementsMemory()[i] * arrayHeight);
 				gl.glVertex2f(i * width, 1);
 				gl.glVertex2f((i + 1) * width, 1);
-				gl.glVertex2f((i + 1) * width, 1 + copy.getElementsMemory()[i] * 0.001f);
+				gl.glVertex2f((i + 1) * width, 1 + copy.getElementsMemory()[i] * arrayHeight);
 				gl.glColor3f(0f, 0f, 0f);
 			}
+
 		}
 		gl.glEnd();
 	}

@@ -28,11 +28,9 @@ public class SortingData {
 	@GuardedBy("lock")
 	private final short[] elementsMemory;
 	@GuardedBy("lock")
-	private final int[] swapIndexes = { CommonConstants.NO_STATEMENT, CommonConstants.NO_STATEMENT,
-			CommonConstants.NO_STATEMENT, CommonConstants.NO_STATEMENT };
+	private SortingOperationIndexes swapIndexes = SortingOperationIndexes.noStatement();
 	@GuardedBy("lock")
-	private final int[] comparisonIndexes = { CommonConstants.NO_STATEMENT, CommonConstants.NO_STATEMENT,
-			CommonConstants.NO_STATEMENT, CommonConstants.NO_STATEMENT };
+	private SortingOperationIndexes comparisonIndexes = SortingOperationIndexes.noStatement();
 	@GuardedBy("lock")
 	private int swapSleep = CommonConstants.DEFAULT_SWAP_SLEEP;
 	@GuardedBy("lock")
@@ -141,37 +139,19 @@ public class SortingData {
 
 	public void clearNexts() {
 		synchronized (lock) {
-			swapIndexes[0] = CommonConstants.NO_STATEMENT;
-			swapIndexes[1] = CommonConstants.NO_STATEMENT;
-			swapIndexes[2] = CommonConstants.NO_STATEMENT;
-			swapIndexes[3] = CommonConstants.NO_STATEMENT;
-			comparisonIndexes[0] = CommonConstants.NO_STATEMENT;
-			comparisonIndexes[1] = CommonConstants.NO_STATEMENT;
-			comparisonIndexes[2] = CommonConstants.NO_STATEMENT;
-			comparisonIndexes[3] = CommonConstants.NO_STATEMENT;
+			swapIndexes = SortingOperationIndexes.noStatement();
+			comparisonIndexes = SortingOperationIndexes.noStatement();
 		}
 	}
 
 	private void setNextSwap(int index0, int index1, int index2, int index3) {
-		swapIndexes[0] = index0;
-		swapIndexes[1] = index1;
-		swapIndexes[2] = index2;
-		swapIndexes[3] = index3;
-		comparisonIndexes[0] = CommonConstants.NO_STATEMENT;
-		comparisonIndexes[1] = CommonConstants.NO_STATEMENT;
-		comparisonIndexes[2] = CommonConstants.NO_STATEMENT;
-		comparisonIndexes[3] = CommonConstants.NO_STATEMENT;
+		swapIndexes = SortingOperationIndexes.instance(index0, index1, index2, index3);
+		comparisonIndexes = SortingOperationIndexes.noStatement();
 	}
 
 	private void setNextComparison(int index0, int index1, int index2, int index3) {
-		comparisonIndexes[0] = index0;
-		comparisonIndexes[1] = index1;
-		comparisonIndexes[2] = index2;
-		comparisonIndexes[3] = index3;
-		swapIndexes[0] = CommonConstants.NO_STATEMENT;
-		swapIndexes[1] = CommonConstants.NO_STATEMENT;
-		swapIndexes[2] = CommonConstants.NO_STATEMENT;
-		swapIndexes[3] = CommonConstants.NO_STATEMENT;
+		comparisonIndexes = SortingOperationIndexes.instance(index0, index1, index2, index3);
+		swapIndexes = SortingOperationIndexes.noStatement();
 	}
 
 	public void copyArrayToMemory() {
