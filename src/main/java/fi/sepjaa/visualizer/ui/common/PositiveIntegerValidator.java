@@ -57,14 +57,14 @@ public class PositiveIntegerValidator implements DocumentListener {
 		} catch (BadLocationException e) {
 			validationError();
 		}
-		LOG.info("Text value:{}", text);
+		LOG.debug("Text value:{}", text);
 		if (text.isEmpty() || containsIllegalCharacters(text)) {
 			validationError();
 			return;
 		}
 		try {
 			long value = (long) format.parseObject(text);
-			LOG.info("Value:{}", value);
+			LOG.debug("Value:{}", value);
 			if (value < 0) {
 				validationError();
 			} else {
@@ -76,7 +76,7 @@ public class PositiveIntegerValidator implements DocumentListener {
 	}
 
 	private boolean containsIllegalCharacters(String text) {
-		LOG.info("Text {} matches {}", text, !Pattern.matches("[0-9]", text));
+		LOG.debug("Text {} matches {}", text, !Pattern.matches("[0-9]", text));
 		return !Pattern.matches("[0-9,.]+", text);
 	}
 
@@ -85,13 +85,6 @@ public class PositiveIntegerValidator implements DocumentListener {
 	}
 
 	private void validated(long value) {
-//		String formatted = format.format(value);
-//		String text = this.field.getText();
-//		LOG.info("formatted {}, text {}", formatted, text);
-//		if (!formatted.equals(this.field.getText())) {
-//			LOG.info("Updating field text");
-//			//this.field.setText(formatted);
-//		}
 		this.field.setBackground(Color.WHITE);
 		this.onChange.accept(value);
 	}
