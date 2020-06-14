@@ -1,5 +1,6 @@
 package fi.sepjaa.visualizer.sorting;
 
+import java.util.Arrays;
 import java.util.Random;
 
 import javax.annotation.concurrent.GuardedBy;
@@ -32,17 +33,21 @@ public class SortingData {
 	@GuardedBy("lock")
 	private SortingOperationIndexes comparisonIndexes = SortingOperationIndexes.noStatement();
 	@GuardedBy("lock")
-	private int swapSleep = CommonConstants.DEFAULT_SWAP_SLEEP;
+	private long swapSleep = CommonConstants.DEFAULT_SWAP_SLEEP;
 	@GuardedBy("lock")
-	private int compareSleep = CommonConstants.DEFAULT_COMPARISON_SLEEP;
+	private long comparisonSleep = CommonConstants.DEFAULT_COMPARISON_SLEEP;
 
-	public SortingData(int elementCount, SortingAlgorithm algorithm) {
+	public SortingData(long elementCount, SortingAlgorithm algorithm) {
+		this(elementCount, algorithm, CommonConstants.DEFAULT_SWAP_SLEEP, CommonConstants.DEFAULT_COMPARISON_SLEEP);
+	}
+
+	public SortingData(long elementCount, SortingAlgorithm algorithm, long swapSleep, long comparisonSleep) {
 		if (elementCount <= 0) {
 			LOG.error("Invalid element count {}, set to default {}", elementCount,
 					CommonConstants.DEFAULT_SORTING_ELEMENT_AMOUNT);
 			elementCount = CommonConstants.DEFAULT_SORTING_ELEMENT_AMOUNT;
 		}
-		int n = elementCount + (algorithm.isTempValueBufferAlgorithm() ? 1 : 0);
+		int n = (int) elementCount + (algorithm.isTempValueBufferAlgorithm() ? 1 : 0);
 
 		elements = new short[n];
 		elementsMemory = new short[n];
@@ -50,20 +55,22 @@ public class SortingData {
 		for (int i = 0; i < elementCount; i++) {
 			elements[i] = (short) random.nextInt(1001);
 		}
-		LOG.info("SortingData {} created with {} elements", this, elements.length);
+		this.swapSleep = swapSleep;
+		this.comparisonSleep = comparisonSleep;
+		LOG.info("Constructed {}", this);
 	}
 
-	public void setSwapSleep(int swapSleep) {
+	public void setSwapSleep(long swapSleep) {
 		LOG.info("Updating swap sleep to {}", swapSleep);
 		synchronized (lock) {
 			this.swapSleep = swapSleep;
 		}
 	}
 
-	public void setCompareSleep(int compareSleep) {
+	public void setComparisonSleep(long compareSleep) {
 		LOG.info("Updating compare sleep to {}", compareSleep);
 		synchronized (lock) {
-			this.compareSleep = compareSleep;
+			this.comparisonSleep = compareSleep;
 		}
 	}
 
@@ -75,7 +82,8 @@ public class SortingData {
 
 	public ImmutableSortingData getCopy() {
 		synchronized (lock) {
-			return new ImmutableSortingData(elements, elementsMemory, swapIndexes, comparisonIndexes);
+			return new ImmutableSortingData(elements, elementsMemory, swapIndexes, comparisonIndexes, swapSleep,
+					comparisonSleep);
 		}
 	}
 
@@ -105,25 +113,25 @@ public class SortingData {
 	}
 
 	private void compareNext(int index1, int index2) {
-		int compareSleep;
+		long compareSleep;
 		synchronized (lock) {
 			setNextComparison(index1, index2, CommonConstants.NO_STATEMENT, CommonConstants.NO_STATEMENT);
-			compareSleep = this.compareSleep;
+			compareSleep = this.comparisonSleep;
 		}
 		Utils.sleep(compareSleep);
 	}
 
 	private void compareNextInMemory(int index1, int index2) {
-		int compareSleep;
+		long compareSleep;
 		synchronized (lock) {
 			setNextComparison(CommonConstants.NO_STATEMENT, CommonConstants.NO_STATEMENT, index1, index2);
-			compareSleep = this.compareSleep;
+			compareSleep = this.comparisonSleep;
 		}
 		Utils.sleep(compareSleep);
 	}
 
 	public void swap(int index1, int index2) {
-		int swapSleep;
+		long swapSleep;
 		synchronized (lock) {
 			setNextSwap(index1, index2, CommonConstants.NO_STATEMENT, CommonConstants.NO_STATEMENT);
 			swapSleep = this.swapSleep;
@@ -161,7 +169,7 @@ public class SortingData {
 			if (Thread.currentThread().isInterrupted()) {
 				return;
 			}
-			int swapSleep;
+			long swapSleep;
 			synchronized (lock) {
 				swapSleep = this.swapSleep;
 				setNextSwap(i, CommonConstants.NO_STATEMENT, i, CommonConstants.NO_STATEMENT);
@@ -188,7 +196,7 @@ public class SortingData {
 	}
 
 	private void memoryArraySwapNext(int index, int memoryIndex) {
-		int swapSleep;
+		long swapSleep;
 		synchronized (lock) {
 			swapSleep = this.swapSleep;
 			setNextSwap(index, CommonConstants.NO_STATEMENT, memoryIndex, CommonConstants.NO_STATEMENT);
@@ -217,7 +225,7 @@ public class SortingData {
 	}
 
 	private void tempSwap(int index) {
-		int swapSleep;
+		long swapSleep;
 		synchronized (lock) {
 			swapSleep = this.swapSleep;
 			setNextSwap(index, elements.length - 1, CommonConstants.NO_STATEMENT, CommonConstants.NO_STATEMENT);
@@ -240,12 +248,89 @@ public class SortingData {
 	}
 
 	private void tempCompare(int index) {
-		int comparisonSleep;
+		long comparisonSleep;
 		synchronized (lock) {
 			comparisonSleep = this.swapSleep;
 			setNextComparison(index, elements.length - 1, CommonConstants.NO_STATEMENT, CommonConstants.NO_STATEMENT);
 		}
 		Utils.sleep(comparisonSleep);
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + (int) (comparisonSleep ^ (comparisonSleep >>> 32));
+		result = prime * result + ((comparisonIndexes == null) ? 0 : comparisonIndexes.hashCode());
+		result = prime * result + Arrays.hashCode(elements);
+		result = prime * result + Arrays.hashCode(elementsMemory);
+		result = prime * result + ((lock == null) ? 0 : lock.hashCode());
+		result = prime * result + ((random == null) ? 0 : random.hashCode());
+		result = prime * result + ((swapIndexes == null) ? 0 : swapIndexes.hashCode());
+		result = prime * result + (int) (swapSleep ^ (swapSleep >>> 32));
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null) {
+			return false;
+		}
+		if (getClass() != obj.getClass()) {
+			return false;
+		}
+		SortingData other = (SortingData) obj;
+		if (comparisonSleep != other.comparisonSleep) {
+			return false;
+		}
+		if (comparisonIndexes == null) {
+			if (other.comparisonIndexes != null) {
+				return false;
+			}
+		} else if (!comparisonIndexes.equals(other.comparisonIndexes)) {
+			return false;
+		}
+		if (!Arrays.equals(elements, other.elements)) {
+			return false;
+		}
+		if (!Arrays.equals(elementsMemory, other.elementsMemory)) {
+			return false;
+		}
+		if (lock == null) {
+			if (other.lock != null) {
+				return false;
+			}
+		} else if (!lock.equals(other.lock)) {
+			return false;
+		}
+		if (random == null) {
+			if (other.random != null) {
+				return false;
+			}
+		} else if (!random.equals(other.random)) {
+			return false;
+		}
+		if (swapIndexes == null) {
+			if (other.swapIndexes != null) {
+				return false;
+			}
+		} else if (!swapIndexes.equals(other.swapIndexes)) {
+			return false;
+		}
+		if (swapSleep != other.swapSleep) {
+			return false;
+		}
+		return true;
+	}
+
+	@Override
+	public String toString() {
+		return "SortingData [swapSleep=" + swapSleep + ", compareSleep=" + comparisonSleep + ", elements="
+				+ Arrays.toString(elements) + ", elementsMemory=" + Arrays.toString(elementsMemory) + ", swapIndexes="
+				+ swapIndexes + ", comparisonIndexes=" + comparisonIndexes + "]";
 	}
 
 }

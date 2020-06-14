@@ -25,7 +25,7 @@ import fi.sepjaa.visualizer.ui.common.UiConstants;
  */
 @Component
 public class NodeSelectionManager implements PathfindingVisualizerMouseListener, PathfindingVisualizerSizeListener,
-		PathfindingDataAware, NodeSelectionUpdateDispatcher {
+		PathfindingDataListener, NodeSelectionUpdateDispatcher {
 	private static final Logger LOG = LoggerFactory.getLogger(NodeSelectionManager.class);
 
 	private final List<PathfindingNodeSelectionListener> listeners = new CopyOnWriteArrayList<>();

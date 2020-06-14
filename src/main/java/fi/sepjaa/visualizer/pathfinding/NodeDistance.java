@@ -3,25 +3,25 @@ package fi.sepjaa.visualizer.pathfinding;
 import fi.sepjaa.visualizer.common.CommonConstants;
 
 public class NodeDistance {
-	private final int nodeId;
-	private final int predecessor;
+	private final long nodeId;
+	private final long predecessor;
 	private final float distance;
 
-	public NodeDistance(int nodeId) {
+	public NodeDistance(long nodeId) {
 		this(nodeId, CommonConstants.NO_STATEMENT, Float.MAX_VALUE);
 	}
 
-	public NodeDistance(int nodeId, int predecessor, float distance) {
+	public NodeDistance(long nodeId, long predecessor, float distance) {
 		this.nodeId = nodeId;
 		this.predecessor = predecessor;
 		this.distance = distance;
 	}
 
-	public int getNodeId() {
+	public long getNodeId() {
 		return nodeId;
 	}
 
-	public int getPredecessor() {
+	public long getPredecessor() {
 		return predecessor;
 	}
 
@@ -34,8 +34,8 @@ public class NodeDistance {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + Float.floatToIntBits(distance);
-		result = prime * result + nodeId;
-		result = prime * result + predecessor;
+		result = prime * result + (int) (nodeId ^ (nodeId >>> 32));
+		result = prime * result + (int) (predecessor ^ (predecessor >>> 32));
 		return result;
 	}
 
@@ -65,7 +65,7 @@ public class NodeDistance {
 
 	@Override
 	public String toString() {
-		return "NodeDistance [distance=" + distance + ", nodeId=" + nodeId + ", predecessor=" + predecessor + "]";
+		return "NodeDistance [nodeId=" + nodeId + ", predecessor=" + predecessor + ", distance=" + distance + "]";
 	}
 
 }

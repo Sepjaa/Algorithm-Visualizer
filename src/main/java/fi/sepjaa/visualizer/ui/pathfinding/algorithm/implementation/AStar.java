@@ -20,13 +20,13 @@ public class AStar extends Dijkstra {
 	}
 
 	@Override
-	protected float evaluateNeighbour(PathfindingData data, ImmutablePathfindingData copy, int nodeId, int neighbourId,
-			Map<Integer, NodeDistance> distances) {
+	protected float evaluateNeighbour(PathfindingData data, ImmutablePathfindingData copy, long nodeId,
+			long neighbourId, Map<Long, NodeDistance> distances) {
 		return super.evaluateNeighbour(data, copy, nodeId, neighbourId, distances) + distanceToEnd(copy, neighbourId);
 	}
 
-	private float distanceToEnd(ImmutablePathfindingData copy, int neighbourId) {
-		ImmutableMap<Integer, Node> nodes = copy.getNodes();
+	private float distanceToEnd(ImmutablePathfindingData copy, long neighbourId) {
+		ImmutableMap<Long, Node> nodes = copy.getNodes();
 		Node neighbour = nodes.get(neighbourId);
 		Node end = nodes.get(copy.getEnd());
 		return neighbour.distanceTo(end);

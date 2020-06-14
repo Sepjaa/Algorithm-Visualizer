@@ -26,7 +26,6 @@ import fi.sepjaa.visualizer.pathfinding.PathfindingData;
 import fi.sepjaa.visualizer.pathfinding.algorithm.PathfindingAlgorithm;
 import fi.sepjaa.visualizer.pathfinding.algorithm.PathfindingAlgorithm.Type;
 import fi.sepjaa.visualizer.ui.common.AlgorithmPanel;
-import fi.sepjaa.visualizer.ui.common.PositiveIntegerVerifier;
 import fi.sepjaa.visualizer.ui.common.UiConstants;
 import net.miginfocom.swing.MigLayout;
 
@@ -35,44 +34,48 @@ import net.miginfocom.swing.MigLayout;
 public class PathfindingPanel extends AlgorithmPanel implements PathfindingNodeSelectionListener {
 
 	private static final Logger LOG = LoggerFactory.getLogger(PathfindingPanel.class);
-
 	private final NodeSelectionUpdateDispatcher dispatcher;
 
 	private final JTextField nodes, connections, measurementSleep, evaluationSleep;
 	private final JComboBox<Type> algorithmSelection;
 
 	private final ImmutableMap<Type, PathfindingAlgorithm> algorithms;
-	private final ImmutableList<PathfindingDataAware> dataListeners;
+	private final ImmutableList<PathfindingDataListener> dataListeners;
 	private PathfindingData data;
+
+	private long nodeCount = CommonConstants.DEFAULT_PATHFINDING_NODE_AMOUNT;
+	private long connectionCount = CommonConstants.DEFAULT_PATHFINDING_CONNECTIONS_AMOUNT;
 
 	@Autowired
 	public PathfindingPanel(PathfindingVisualizer visualizer, List<PathfindingAlgorithm> algorithms,
-			AlgorithmExecutor executor, List<PathfindingDataAware> dataListeners,
+			AlgorithmExecutor executor, List<PathfindingDataListener> dataListeners,
 			NodeSelectionUpdateDispatcher dispatcher) {
 		super(visualizer, executor);
 		this.dispatcher = dispatcher;
 		this.dataListeners = ImmutableList.copyOf(dataListeners);
-		algorithmSelection = new JComboBox<>();
+		this.algorithmSelection = new JComboBox<>();
 		ImmutableMap.Builder<Type, PathfindingAlgorithm> builder = new ImmutableMap.Builder<>();
 		for (PathfindingAlgorithm alg : algorithms) {
 			builder.put(alg.getType(), alg);
-			algorithmSelection.addItem(alg.getType());
+			this.algorithmSelection.addItem(alg.getType());
 		}
 		this.algorithms = builder.build();
 
-		nodes = new JTextField(String.valueOf(CommonConstants.DEFAULT_PATHFINDING_NODE_AMOUNT));
-		nodes.setPreferredSize(new Dimension((int) 100, nodes.getHeight()));
+		this.nodes = UiConstants.getIntegerInstance(CommonConstants.DEFAULT_PATHFINDING_NODE_AMOUNT,
+				i -> setNodesCount(i));
+		this.nodes.setPreferredSize(new Dimension((int) 100, this.nodes.getHeight()));
 
-		connections = new JTextField(String.valueOf(CommonConstants.DEFAULT_PATHFINDING_CONNECTIONS_AMOUNT));
-		connections.setPreferredSize(new Dimension((int) 100, connections.getHeight()));
+		this.connections = UiConstants.getIntegerInstance(CommonConstants.DEFAULT_PATHFINDING_CONNECTIONS_AMOUNT,
+				i -> setConnectionsCount(i));
+		this.connections.setPreferredSize(new Dimension((int) 100, this.connections.getHeight()));
 
-		measurementSleep = new JTextField(String.valueOf(CommonConstants.DEFAULT_MEASUREMENT_SLEEP));
-		measurementSleep.setPreferredSize(new Dimension((int) 100, measurementSleep.getHeight()));
-		measurementSleep.setInputVerifier(new PositiveIntegerVerifier(i -> setMeasurementSleep()));
+		this.measurementSleep = UiConstants.getIntegerInstance(CommonConstants.DEFAULT_MEASUREMENT_SLEEP,
+				i -> setMeasurementSleep(i));
+		this.measurementSleep.setPreferredSize(new Dimension((int) 100, this.measurementSleep.getHeight()));
 
-		evaluationSleep = new JTextField(String.valueOf(CommonConstants.DEFAULT_EVALUATION_SLEEP));
-		evaluationSleep.setPreferredSize(new Dimension((int) 100, measurementSleep.getHeight()));
-		evaluationSleep.setInputVerifier(new PositiveIntegerVerifier(i -> setEvaluationSleep()));
+		this.evaluationSleep = UiConstants.getIntegerInstance(CommonConstants.DEFAULT_EVALUATION_SLEEP,
+				i -> setEvaluationSleep(i));
+		this.evaluationSleep.setPreferredSize(new Dimension((int) 100, this.evaluationSleep.getHeight()));
 
 		validate();
 	}
@@ -94,28 +97,30 @@ public class PathfindingPanel extends AlgorithmPanel implements PathfindingNodeS
 
 	@Override
 	protected void createData() {
-		data = new PathfindingData(getNodesCount(), getConnectionsCount());
+		if (data == null) {
+			data = new PathfindingData(nodeCount, connectionCount);
+		} else {
+			ImmutablePathfindingData copy = data.getCopy();
+			data = new PathfindingData(nodeCount, connectionCount, copy.getMeasurementSleep(),
+					copy.getMeasurementSleep());
+		}
 		dataListeners.forEach(listener -> listener.bind(data));
-		setMeasurementSleep();
-		setEvaluationSleep();
 	}
 
-	private void setMeasurementSleep() {
-		try {
-			int amount = Integer.parseInt(measurementSleep.getText());
-			data.setMeasurementSleep(amount);
-		} catch (NumberFormatException e) {
-			LOG.error("Invalid value in measurement sleep");
-		}
+	private void setNodesCount(long count) {
+		nodeCount = count;
 	}
 
-	private void setEvaluationSleep() {
-		try {
-			int amount = Integer.parseInt(evaluationSleep.getText());
-			data.setEvaluationSleep(amount);
-		} catch (NumberFormatException e) {
-			LOG.error("Invalid value in measurement sleep");
-		}
+	private void setConnectionsCount(long count) {
+		connectionCount = count;
+	}
+
+	private void setMeasurementSleep(long sleep) {
+		data.setMeasurementSleep(sleep);
+	}
+
+	private void setEvaluationSleep(long sleep) {
+		data.setEvaluationSleep(sleep);
 	}
 
 	@Override
@@ -126,26 +131,6 @@ public class PathfindingPanel extends AlgorithmPanel implements PathfindingNodeS
 	private PathfindingAlgorithm getAlgorithm() {
 		Type type = (Type) algorithmSelection.getSelectedItem();
 		return this.algorithms.get(type);
-	}
-
-	private int getNodesCount() {
-		int amount = CommonConstants.DEFAULT_PATHFINDING_NODE_AMOUNT;
-		try {
-			amount = Integer.parseInt(nodes.getText());
-		} catch (NumberFormatException e) {
-			LOG.error("Invalid value in number of elements!");
-		}
-		return amount;
-	}
-
-	private int getConnectionsCount() {
-		int amount = CommonConstants.DEFAULT_PATHFINDING_CONNECTIONS_AMOUNT;
-		try {
-			amount = Integer.parseInt(connections.getText());
-		} catch (NumberFormatException e) {
-			LOG.error("Invalid value in number of elements!");
-		}
-		return amount;
 	}
 
 	@Override

@@ -48,7 +48,11 @@ public abstract class AlgorithmPanel extends JPanel implements AlgorithmExecutio
 		this.startStop.addActionListener(this::startStopAction);
 		add(this.startStop, "cell 1 1, center, wrap");
 		this.randomize = new JButton(UiConstants.RANDOMIZE_LBL);
-		this.randomize.addActionListener(e -> createData());
+		this.randomize.addActionListener(e -> {
+			randomize.setEnabled(false);
+			createData();
+			randomize.setEnabled(true);
+		});
 		add(this.randomize, "cell 1 1, center");
 
 		this.visualizer.setPreferredSize(

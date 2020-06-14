@@ -6,7 +6,7 @@ public class Utils {
 	 *
 	 * @param micros sleep duration in microseconds.
 	 */
-	public static void sleep(int micros) {
+	public static void sleep(long micros) {
 		if (micros > 0) {
 			final long start = System.nanoTime();
 			if (micros >= 5000) {

@@ -23,14 +23,14 @@ public class Dijkstra extends AbstractPathfindingAlgorithm {
 	@Override
 	public void find(PathfindingData data) {
 		ImmutablePathfindingData copy = data.getCopy();
-		ImmutableMap<Integer, Node> nodes = copy.getNodes();
-		int start = copy.getStart();
-		int end = copy.getEnd();
+		ImmutableMap<Long, Node> nodes = copy.getNodes();
+		long start = copy.getStart();
+		long end = copy.getEnd();
 
 		LOG.debug("Starting dijkstra pathfind with start {} end {}", nodes.get(start), nodes.get(end));
-		Map<Integer, NodeDistance> distances = initializeDistances(nodes, start);
-		List<Integer> evaluated = new ArrayList<>();
-		Optional<Integer> current = getNext(distances, evaluated);
+		Map<Long, NodeDistance> distances = initializeDistances(nodes, start);
+		List<Long> evaluated = new ArrayList<>();
+		Optional<Long> current = getNext(distances, evaluated);
 		while (current.isPresent()) {
 			LOG.trace("Current {}", current);
 			if (Thread.currentThread().isInterrupted()) {
@@ -47,18 +47,18 @@ public class Dijkstra extends AbstractPathfindingAlgorithm {
 		LOG.debug("Stopped dijkstra");
 	}
 
-	private Optional<Integer> getNext(Map<Integer, NodeDistance> distances, List<Integer> evaluated) {
+	private Optional<Long> getNext(Map<Long, NodeDistance> distances, List<Long> evaluated) {
 		Optional<NodeDistance> next = distances.values().stream().filter(n -> !evaluated.contains(n.getNodeId()))
 				.sorted(NodeUtilities.getNodeDistanceComparator()).findFirst();
-		Integer result = null;
+		Long result = null;
 		if (next.isPresent() && next.get().getDistance() < Float.MAX_VALUE) {
 			result = next.get().getNodeId();
 		}
 		return Optional.ofNullable(result);
 	}
 
-	private Map<Integer, NodeDistance> initializeDistances(ImmutableMap<Integer, Node> nodes, int start) {
-		Map<Integer, NodeDistance> distances = new HashMap<>();
+	private Map<Long, NodeDistance> initializeDistances(ImmutableMap<Long, Node> nodes, long start) {
+		Map<Long, NodeDistance> distances = new HashMap<>();
 		for (Node n : nodes.values()) {
 			if (n.getId() != start) {
 				distances.put(n.getId(), new NodeDistance(n.getId()));
@@ -69,12 +69,12 @@ public class Dijkstra extends AbstractPathfindingAlgorithm {
 		return distances;
 	}
 
-	private List<Integer> evaluate(PathfindingData data, ImmutablePathfindingData copy, int nodeId,
-			Map<Integer, NodeDistance> distances) {
-		List<Integer> evaluatedNodes = data.addAndReturnEvaluated(nodeId, distances);
-		ImmutableMap<Integer, Node> nodes = copy.getNodes();
+	private List<Long> evaluate(PathfindingData data, ImmutablePathfindingData copy, long nodeId,
+			Map<Long, NodeDistance> distances) {
+		List<Long> evaluatedNodes = data.addAndReturnEvaluated(nodeId, distances);
+		ImmutableMap<Long, Node> nodes = copy.getNodes();
 		Node node = nodes.get(nodeId);
-		for (Integer neighbourId : node.getConnections()) {
+		for (Long neighbourId : node.getConnections()) {
 			if (!evaluatedNodes.contains(neighbourId) && !Thread.currentThread().isInterrupted()) {
 				float distance = evaluateNeighbour(data, copy, nodeId, neighbourId, distances);
 				NodeDistance current = distances.get(neighbourId);
@@ -88,9 +88,9 @@ public class Dijkstra extends AbstractPathfindingAlgorithm {
 		return evaluatedNodes;
 	}
 
-	protected float evaluateNeighbour(PathfindingData data, ImmutablePathfindingData copy, int nodeId, int neighbourId,
-			Map<Integer, NodeDistance> distances) {
-		ImmutableMap<Integer, Node> nodes = copy.getNodes();
+	protected float evaluateNeighbour(PathfindingData data, ImmutablePathfindingData copy, long nodeId,
+			long neighbourId, Map<Long, NodeDistance> distances) {
+		ImmutableMap<Long, Node> nodes = copy.getNodes();
 		Node evaluatednode = nodes.get(nodeId);
 		Node neighbour = nodes.get(neighbourId);
 		float nodeDistance = distances.get(nodeId).getDistance();

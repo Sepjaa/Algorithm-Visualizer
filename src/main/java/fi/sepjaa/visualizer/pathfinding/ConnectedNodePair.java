@@ -29,11 +29,11 @@ public class ConnectedNodePair {
 		return n1.distanceTo(n2);
 	}
 
-	public boolean contains(int id) {
+	public boolean contains(long id) {
 		return n1.getId() == id || n2.getId() == id;
 	}
 
-	public boolean is(int id, int otherId) {
+	public boolean is(long id, long otherId) {
 		return contains(id) && contains(otherId) && id != otherId;
 	}
 

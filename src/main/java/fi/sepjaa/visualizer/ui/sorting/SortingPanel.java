@@ -13,15 +13,16 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
 import fi.sepjaa.visualizer.common.AlgorithmExecutor;
 import fi.sepjaa.visualizer.common.CommonConstants;
 import fi.sepjaa.visualizer.sorting.SortingData;
+import fi.sepjaa.visualizer.sorting.algorithm.ImmutableSortingData;
 import fi.sepjaa.visualizer.sorting.algorithm.SortingAlgorithm;
 import fi.sepjaa.visualizer.sorting.algorithm.SortingAlgorithm.Type;
 import fi.sepjaa.visualizer.ui.common.AlgorithmPanel;
-import fi.sepjaa.visualizer.ui.common.PositiveIntegerVerifier;
 import fi.sepjaa.visualizer.ui.common.UiConstants;
 import net.miginfocom.swing.MigLayout;
 
@@ -40,33 +41,35 @@ public class SortingPanel extends AlgorithmPanel {
 	private final JTextField elements, comparisonSleep, swapSleep;
 	private final JComboBox<Type> algorithmSelection;
 	private final ImmutableMap<Type, SortingAlgorithm> algorithms;
-	private final SortingVisualizer visualizer;
+	private final ImmutableList<SortingDataListener> dataListeners;
 	private SortingData data;
+	private long elementCount = CommonConstants.DEFAULT_SORTING_ELEMENT_AMOUNT;
 
 	@Autowired
-	public SortingPanel(SortingVisualizer visualizer, List<SortingAlgorithm> algorithms, AlgorithmExecutor executor) {
+	public SortingPanel(SortingVisualizer visualizer, List<SortingAlgorithm> algorithms, AlgorithmExecutor executor,
+			List<SortingDataListener> dataListeners) {
 		super(visualizer, executor);
-		this.visualizer = visualizer;
-		algorithmSelection = new JComboBox<>();
+		this.algorithmSelection = new JComboBox<>();
 		ImmutableMap.Builder<Type, SortingAlgorithm> builder = new ImmutableMap.Builder<>();
 		for (SortingAlgorithm alg : algorithms) {
 			builder.put(alg.getType(), alg);
-			algorithmSelection.addItem(alg.getType());
+			this.algorithmSelection.addItem(alg.getType());
 		}
 		this.algorithms = builder.build();
+		this.dataListeners = ImmutableList.copyOf(dataListeners);
 
-		elements = new JTextField(String.valueOf(CommonConstants.DEFAULT_SORTING_ELEMENT_AMOUNT));
-		elements.setPreferredSize(new Dimension((int) 100, elements.getHeight()));
+		this.elements = UiConstants.getIntegerInstance(CommonConstants.DEFAULT_SORTING_ELEMENT_AMOUNT,
+				i -> setElementsCount(i));
+		this.elements.setPreferredSize(new Dimension((int) 100, this.elements.getHeight()));
 
-		comparisonSleep = new JTextField(String.valueOf(CommonConstants.DEFAULT_COMPARISON_SLEEP));
-		comparisonSleep.setPreferredSize(new Dimension((int) 100, comparisonSleep.getHeight()));
-		comparisonSleep.setInputVerifier(new PositiveIntegerVerifier(i -> setCompareSleep()));
+		this.comparisonSleep = UiConstants.getIntegerInstance(CommonConstants.DEFAULT_COMPARISON_SLEEP,
+				i -> setCompareSleep(i));
+		this.comparisonSleep.setPreferredSize(new Dimension((int) 100, this.comparisonSleep.getHeight()));
 
-		swapSleep = new JTextField(String.valueOf(CommonConstants.DEFAULT_SWAP_SLEEP));
-		swapSleep.setPreferredSize(new Dimension((int) 100, swapSleep.getHeight()));
-		swapSleep.setInputVerifier(new PositiveIntegerVerifier(i -> setSwapSleep()));
+		this.swapSleep = UiConstants.getIntegerInstance(CommonConstants.DEFAULT_SWAP_SLEEP, i -> setSwapSleep(i));
+		this.swapSleep.setPreferredSize(new Dimension((int) 100, this.swapSleep.getHeight()));
 
-		algorithmSelection.addActionListener(a -> {
+		this.algorithmSelection.addActionListener(a -> {
 			createData();
 			visualizer.setDrawMemory(getAlgorithm().isFullMemoryBufferAlgorithm());
 		});
@@ -76,10 +79,13 @@ public class SortingPanel extends AlgorithmPanel {
 
 	@Override
 	protected void createData() {
-		data = new SortingData(getElementsCount(), getAlgorithm());
-		setCompareSleep();
-		setSwapSleep();
-		visualizer.bind(data);
+		if (data == null) {
+			data = new SortingData(elementCount, getAlgorithm());
+		} else {
+			ImmutableSortingData copy = data.getCopy();
+			data = new SortingData(elementCount, getAlgorithm(), copy.getSwapSleep(), copy.getComparisonSleep());
+		}
+		dataListeners.forEach(listener -> listener.bind(data));
 	}
 
 	@Override
@@ -92,32 +98,16 @@ public class SortingPanel extends AlgorithmPanel {
 		return this.algorithms.get(type);
 	}
 
-	private int getElementsCount() {
-		int amount = CommonConstants.DEFAULT_SORTING_ELEMENT_AMOUNT;
-		try {
-			amount = Integer.parseInt(elements.getText());
-		} catch (NumberFormatException e) {
-			LOG.error("Invalid value in number of elements!");
-		}
-		return amount;
+	private void setElementsCount(long count) {
+		elementCount = count;
 	}
 
-	private void setCompareSleep() {
-		try {
-			int amount = Integer.parseInt(comparisonSleep.getText());
-			data.setCompareSleep(amount);
-		} catch (NumberFormatException e) {
-			LOG.warn("Invalid value in comparison sleep!");
-		}
+	private void setCompareSleep(long sleep) {
+		data.setComparisonSleep(sleep);
 	}
 
-	private void setSwapSleep() {
-		try {
-			int amount = Integer.parseInt(swapSleep.getText());
-			data.setSwapSleep(amount);
-		} catch (NumberFormatException e) {
-			LOG.warn("Invalid value in swap sleep!");
-		}
+	private void setSwapSleep(long sleep) {
+		data.setSwapSleep(sleep);
 	}
 
 	@Override

@@ -1,5 +1,16 @@
 package fi.sepjaa.visualizer.ui.common;
 
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.text.DecimalFormat;
+import java.text.Format;
+import java.util.function.Consumer;
+
+import javax.swing.JFormattedTextField;
+import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
+
 /**
  * Various constants and UI vocabulary.
  *
@@ -34,4 +45,33 @@ public class UiConstants {
 	public static final String SWAP_LBL = "Swap";
 	public static final String MEASUREMENT_LBL = "Measure";
 	public static final String EVALUATION_LBL = "Evaluation";
+
+	public static final Format INTEGER_FORMAT = new DecimalFormat("#,###");
+
+	public static JTextField getIntegerInstance(long value) {
+		return getIntegerInstance(value, (i) -> {
+			return;
+		});
+	}
+
+	public static JTextField getIntegerInstance(long value, Consumer<Long> onChange) {
+		final JFormattedTextField result = new JFormattedTextField(INTEGER_FORMAT);
+		result.setValue(value);
+		result.addMouseListener(getJFTFCaretFixingMouseListener());
+		result.getDocument().addDocumentListener(new PositiveIntegerValidator(result, INTEGER_FORMAT, onChange));
+		return result;
+	}
+
+	private static MouseListener getJFTFCaretFixingMouseListener() {
+		return new MouseAdapter() {
+			@Override
+			public void mousePressed(MouseEvent e) {
+				SwingUtilities.invokeLater(() -> {
+					JFormattedTextField ftf = (JFormattedTextField) e.getSource();
+					int offset = ftf.viewToModel(e.getPoint());
+					ftf.setCaretPosition(offset);
+				});
+			}
+		};
+	}
 }

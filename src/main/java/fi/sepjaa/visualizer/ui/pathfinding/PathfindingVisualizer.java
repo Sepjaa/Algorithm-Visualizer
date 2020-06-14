@@ -29,7 +29,7 @@ import fi.sepjaa.visualizer.ui.common.UiConstants;
 
 @SuppressWarnings("serial")
 @Component
-public class PathfindingVisualizer extends GLCanvasVisualizer implements PathfindingDataAware {
+public class PathfindingVisualizer extends GLCanvasVisualizer implements PathfindingDataListener {
 
 	private static final Logger LOG = LoggerFactory.getLogger(PathfindingVisualizer.class);
 	private float ratio = 1;
@@ -98,10 +98,10 @@ public class PathfindingVisualizer extends GLCanvasVisualizer implements Pathfin
 			copy = this.data.getCopy();
 		}
 
-		Map<Integer, Node> nodes = copy.getNodes();
-		List<Integer> path = copy.getPath();
+		Map<Long, Node> nodes = copy.getNodes();
+		List<Long> path = copy.getPath();
 		Optional<ConnectedNodePair> measurement = copy.getMeasurement();
-		List<Integer> evaluated = copy.getEvaluated();
+		List<Long> evaluated = copy.getEvaluated();
 
 		GL2 gl = drawable.getGL().getGL2();
 		gl.glClear(GL_COLOR_BUFFER_BIT);

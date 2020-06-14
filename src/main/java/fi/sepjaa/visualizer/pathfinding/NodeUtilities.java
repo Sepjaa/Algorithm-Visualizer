@@ -25,14 +25,14 @@ import fi.sepjaa.visualizer.common.CommonConstants;
 public class NodeUtilities {
 	public static final Logger LOG = LoggerFactory.getLogger(NodeUtilities.class);
 	private static final float ACCEPTABLE_LOWER_THAN_AVERAGE_FACTOR = 0.80f;
-	private static final int ACCEPTABLE_SEARCH_ITERATIONS = 500;
+	private static final int ACCEPTABLE_SEARCH_ITERATIONS = 100;
 	public static final int INT_FLOAT_COMPARATOR_ACCURACY = 10000;
 
-	public static ImmutableMap<Integer, Node> spawnNodes(int nodeCount, int connectionsCount) {
-		Map<Integer, Node> builder = new HashMap<>();
+	public static ImmutableMap<Long, Node> spawnNodes(long nodeCount, long connectionsCount) {
+		Map<Long, Node> builder = new HashMap<>();
 		float averageDistance = 0.5f;
 		int refreshDistanceAt = 2;
-		for (int i = 0; i < nodeCount; i++) {
+		for (long i = 0; i < nodeCount; i++) {
 			if (i > refreshDistanceAt) {
 				refreshDistanceAt *= 2;
 				averageDistance = calcAverageClosestDistance(builder.values());
@@ -74,7 +74,7 @@ public class NodeUtilities {
 		}).min().orElse(Double.MAX_VALUE);
 	}
 
-	private static Node spawnAcceptableNode(int id, Map<Integer, Node> currentNodes, float avgDistance) {
+	private static Node spawnAcceptableNode(long id, Map<Long, Node> currentNodes, float avgDistance) {
 		Node candidate = Node.randomInstance(id);
 		float mostDistant = 0;
 		LOG.trace("Avg distance {} at {}", avgDistance, id);
@@ -93,7 +93,7 @@ public class NodeUtilities {
 				LOG.trace("Found candidate node with distance {} ", distance, id);
 			}
 		}
-		LOG.info("Exhausted acceptable iterations avg {} mostDistant {}", avgDistance, mostDistant);
+		LOG.debug("Exhausted acceptable iterations avg {} mostDistant {}", avgDistance, mostDistant);
 		return candidate;
 	}
 

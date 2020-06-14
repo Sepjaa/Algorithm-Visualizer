@@ -18,14 +18,17 @@ public class ImmutableSortingData {
 	private final SortingOperationIndexes swapIndexes;
 	private final SortingOperationIndexes comparisonIndexes;
 	private final boolean memoryArray;
+	private final long swapSleep, comparisonSleep;
 
 	public ImmutableSortingData(short[] elements, short[] elementsMemory, SortingOperationIndexes swapIndexes,
-			SortingOperationIndexes comparisonIndexes) {
+			SortingOperationIndexes comparisonIndexes, long swapSleep, long comparisonSleep) {
 		super();
 		this.elements = Arrays.copyOf(elements, elements.length);
 		this.elementsMemory = Arrays.copyOf(elementsMemory, elementsMemory.length);
 		this.swapIndexes = swapIndexes;
 		this.comparisonIndexes = comparisonIndexes;
+		this.swapSleep = swapSleep;
+		this.comparisonSleep = comparisonSleep;
 		boolean memoryArray = false;
 		for (int i = 0; i < elementsMemory.length; i++) {
 			if (elementsMemory[i] != 0) {
@@ -56,6 +59,14 @@ public class ImmutableSortingData {
 		return comparisonIndexes;
 	}
 
+	public long getSwapSleep() {
+		return swapSleep;
+	}
+
+	public long getComparisonSleep() {
+		return comparisonSleep;
+	}
+
 	public boolean isMemoryArray() {
 		return memoryArray;
 	}
@@ -65,10 +76,12 @@ public class ImmutableSortingData {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + ((comparisonIndexes == null) ? 0 : comparisonIndexes.hashCode());
+		result = prime * result + (int) (comparisonSleep ^ (comparisonSleep >>> 32));
 		result = prime * result + Arrays.hashCode(elements);
 		result = prime * result + Arrays.hashCode(elementsMemory);
 		result = prime * result + (memoryArray ? 1231 : 1237);
 		result = prime * result + ((swapIndexes == null) ? 0 : swapIndexes.hashCode());
+		result = prime * result + (int) (swapSleep ^ (swapSleep >>> 32));
 		return result;
 	}
 
@@ -91,6 +104,9 @@ public class ImmutableSortingData {
 		} else if (!comparisonIndexes.equals(other.comparisonIndexes)) {
 			return false;
 		}
+		if (comparisonSleep != other.comparisonSleep) {
+			return false;
+		}
 		if (!Arrays.equals(elements, other.elements)) {
 			return false;
 		}
@@ -107,6 +123,9 @@ public class ImmutableSortingData {
 		} else if (!swapIndexes.equals(other.swapIndexes)) {
 			return false;
 		}
+		if (swapSleep != other.swapSleep) {
+			return false;
+		}
 		return true;
 	}
 
@@ -114,7 +133,8 @@ public class ImmutableSortingData {
 	public String toString() {
 		return "ImmutableSortingData [elements=" + Arrays.toString(elements) + ", elementsMemory="
 				+ Arrays.toString(elementsMemory) + ", swapIndexes=" + swapIndexes + ", comparisonIndexes="
-				+ comparisonIndexes + ", memoryArray=" + memoryArray + "]";
+				+ comparisonIndexes + ", memoryArray=" + memoryArray + ", swapSleep=" + swapSleep + ", comparisonSleep="
+				+ comparisonSleep + "]";
 	}
 
 }

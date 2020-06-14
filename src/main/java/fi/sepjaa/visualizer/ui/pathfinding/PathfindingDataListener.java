@@ -9,9 +9,10 @@ import fi.sepjaa.visualizer.pathfinding.PathfindingData;
  * @author Jaakko
  *
  */
-public interface PathfindingDataAware {
+public interface PathfindingDataListener {
 
 	void bind(PathfindingData data);
 
 	void unBind();
+
 }

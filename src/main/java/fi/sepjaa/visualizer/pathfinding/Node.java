@@ -12,23 +12,23 @@ public class Node {
 	private static final Random random = new Random();
 	private static final float NODE_BUFFER_ZONE_WIDTH = 0.05f;
 
-	private final int id;
+	private final long id;
 	private final float x, y;
-	private final List<Integer> connections;
+	private final List<Long> connections;
 
-	public Node(int id, float x, float y) {
+	public Node(long id, float x, float y) {
 		this.id = id;
 		this.x = x;
 		this.y = y;
 		this.connections = new LinkedList<>();
 	}
 
-	public static Node randomInstance(int id) {
+	public static Node randomInstance(long id) {
 		return new Node(id, NODE_BUFFER_ZONE_WIDTH + random.nextFloat() * (1 - 2 * NODE_BUFFER_ZONE_WIDTH),
 				NODE_BUFFER_ZONE_WIDTH + random.nextFloat() * (1 - 2 * NODE_BUFFER_ZONE_WIDTH));
 	}
 
-	void addConnection(int id) {
+	void addConnection(long id) {
 		connections.add(id);
 	}
 
@@ -44,11 +44,11 @@ public class Node {
 		return y;
 	}
 
-	public int getId() {
+	public long getId() {
 		return id;
 	}
 
-	public List<Integer> getConnections() {
+	public List<Long> getConnections() {
 		return connections;
 	}
 
@@ -57,7 +57,7 @@ public class Node {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + ((connections == null) ? 0 : connections.hashCode());
-		result = prime * result + id;
+		result = prime * result + (int) (id ^ (id >>> 32));
 		result = prime * result + Float.floatToIntBits(x);
 		result = prime * result + Float.floatToIntBits(y);
 		return result;
@@ -98,4 +98,5 @@ public class Node {
 	public String toString() {
 		return "Node [id=" + id + ", x=" + x + ", y=" + y + ", connections=" + connections + "]";
 	}
+
 }

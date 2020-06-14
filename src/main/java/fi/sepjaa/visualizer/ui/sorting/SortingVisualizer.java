@@ -24,7 +24,7 @@ import fi.sepjaa.visualizer.ui.common.GLCanvasVisualizer;
  */
 @SuppressWarnings("serial")
 @Component
-public class SortingVisualizer extends GLCanvasVisualizer {
+public class SortingVisualizer extends GLCanvasVisualizer implements SortingDataListener {
 	private static final float BAR_MAX_HEIGHT = 0.002f;
 	private final Object lock = new Object();
 	@GuardedBy("lock")
@@ -32,12 +32,14 @@ public class SortingVisualizer extends GLCanvasVisualizer {
 	@GuardedBy("lock")
 	private boolean drawMemory = false;
 
+	@Override
 	public void bind(SortingData data) {
 		synchronized (lock) {
 			this.data = data;
 		}
 	}
 
+	@Override
 	public void unBind() {
 		synchronized (lock) {
 			this.data = null;

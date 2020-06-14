@@ -9,36 +9,45 @@ import com.google.common.collect.ImmutableMap;
 
 public class ImmutablePathfindingData {
 
-	private final ImmutableMap<Integer, Node> nodes;
-	private final int start;
-	private final int end;
-	private final ImmutableList<Integer> path;
+	private final ImmutableMap<Long, Node> nodes;
+	private final long start, end, measurementSleep, evaluationSleep;
+	private final ImmutableList<Long> path;
 	private final Optional<ConnectedNodePair> measurement;
-	private final ImmutableList<Integer> evaluated;
+	private final ImmutableList<Long> evaluated;
 
-	public ImmutablePathfindingData(Map<Integer, Node> nodes, int start, int end, List<Integer> path,
-			Optional<ConnectedNodePair> measurement, List<Integer> evaluated) {
+	public ImmutablePathfindingData(Map<Long, Node> nodes, long start, long end, long measurementSleep,
+			long evaluationSleep, List<Long> path, Optional<ConnectedNodePair> measurement, List<Long> evaluated) {
 		this.nodes = ImmutableMap.copyOf(nodes);
 		this.start = start;
 		this.end = end;
+		this.measurementSleep = measurementSleep;
+		this.evaluationSleep = evaluationSleep;
 		this.path = ImmutableList.copyOf(path);
 		this.measurement = measurement;
 		this.evaluated = ImmutableList.copyOf(evaluated);
 	}
 
-	public ImmutableMap<Integer, Node> getNodes() {
+	public ImmutableMap<Long, Node> getNodes() {
 		return nodes;
 	}
 
-	public int getStart() {
+	public long getStart() {
 		return start;
 	}
 
-	public int getEnd() {
+	public long getEnd() {
 		return end;
 	}
 
-	public ImmutableList<Integer> getPath() {
+	public long getMeasurementSleep() {
+		return measurementSleep;
+	}
+
+	public long getEvaluationSleep() {
+		return evaluationSleep;
+	}
+
+	public ImmutableList<Long> getPath() {
 		return path;
 	}
 
@@ -46,7 +55,7 @@ public class ImmutablePathfindingData {
 		return measurement;
 	}
 
-	public ImmutableList<Integer> getEvaluated() {
+	public ImmutableList<Long> getEvaluated() {
 		return evaluated;
 	}
 
@@ -54,12 +63,14 @@ public class ImmutablePathfindingData {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + end;
+		result = prime * result + (int) (end ^ (end >>> 32));
 		result = prime * result + ((evaluated == null) ? 0 : evaluated.hashCode());
+		result = prime * result + (int) (evaluationSleep ^ (evaluationSleep >>> 32));
 		result = prime * result + ((measurement == null) ? 0 : measurement.hashCode());
+		result = prime * result + (int) (measurementSleep ^ (measurementSleep >>> 32));
 		result = prime * result + ((nodes == null) ? 0 : nodes.hashCode());
 		result = prime * result + ((path == null) ? 0 : path.hashCode());
-		result = prime * result + start;
+		result = prime * result + (int) (start ^ (start >>> 32));
 		return result;
 	}
 
@@ -85,11 +96,17 @@ public class ImmutablePathfindingData {
 		} else if (!evaluated.equals(other.evaluated)) {
 			return false;
 		}
+		if (evaluationSleep != other.evaluationSleep) {
+			return false;
+		}
 		if (measurement == null) {
 			if (other.measurement != null) {
 				return false;
 			}
 		} else if (!measurement.equals(other.measurement)) {
+			return false;
+		}
+		if (measurementSleep != other.measurementSleep) {
 			return false;
 		}
 		if (nodes == null) {
@@ -114,8 +131,9 @@ public class ImmutablePathfindingData {
 
 	@Override
 	public String toString() {
-		return "ImmutablePathfindingData [nodes=" + nodes + ", start=" + start + ", end=" + end + ", path=" + path
-				+ ", measurement=" + measurement + ", evaluated=" + evaluated + "]";
+		return "ImmutablePathfindingData [nodes=" + nodes + ", start=" + start + ", end=" + end + ", measurementSleep="
+				+ measurementSleep + ", evaluationSleep=" + evaluationSleep + ", path=" + path + ", measurement="
+				+ measurement + ", evaluated=" + evaluated + "]";
 	}
 
 }
