@@ -50,8 +50,12 @@ public abstract class AlgorithmPanel extends JPanel implements AlgorithmExecutio
 		this.randomize = new JButton(UiConstants.RANDOMIZE_LBL);
 		this.randomize.addActionListener(e -> {
 			randomize.setEnabled(false);
-			createData();
-			randomize.setEnabled(true);
+			setConfigEnabled(false);
+			SwingUtilities.invokeLater(() -> {
+				createData();
+				randomize.setEnabled(true);
+				setConfigEnabled(true);
+			});
 		});
 		add(this.randomize, "cell 1 1, center");
 
@@ -89,23 +93,21 @@ public abstract class AlgorithmPanel extends JPanel implements AlgorithmExecutio
 	}
 
 	private void setConfigEnabled(boolean enabled) {
-		SwingUtilities.invokeLater(() -> {
-			startStop.setText(enabled ? UiConstants.START_LBL : UiConstants.STOP_LBL);
-			randomize.setEnabled(enabled);
-			for (Component c : this.config.getComponents()) {
-				c.setEnabled(enabled);
-			}
-		});
+		startStop.setText(enabled ? UiConstants.START_LBL : UiConstants.STOP_LBL);
+		randomize.setEnabled(enabled);
+		for (Component c : this.config.getComponents()) {
+			c.setEnabled(enabled);
+		}
 	}
 
 	@Override
 	public void onStart() {
-		setConfigEnabled(false);
+		SwingUtilities.invokeLater(() -> setConfigEnabled(false));
 	}
 
 	@Override
 	public void onEnd(boolean canceled) {
-		setConfigEnabled(true);
+		SwingUtilities.invokeLater(() -> setConfigEnabled(true));
 	}
 
 	public abstract String getTitle();
