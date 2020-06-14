@@ -98,12 +98,26 @@ public class NodeUtilities {
 	}
 
 	public static Comparator<Node> getNodeComparator(Node testNode) {
-		return (Node n1,
-				Node n2) -> (int) (INT_FLOAT_COMPARATOR_ACCURACY * (testNode.distanceTo(n1) - testNode.distanceTo(n2)));
+		return (Node n1, Node n2) -> {
+			if (testNode.distanceTo(n1) > testNode.distanceTo(n2)) {
+				return 1;
+			} else if (testNode.distanceTo(n1) == testNode.distanceTo(n2)) {
+				return 0;
+			} else {
+				return -1;
+			}
+		};
 	}
 
 	public static Comparator<NodeDistance> getNodeDistanceComparator() {
-		return (NodeDistance n1,
-				NodeDistance n2) -> (int) ((n1.getDistance() - n2.getDistance()) * INT_FLOAT_COMPARATOR_ACCURACY);
+		return (NodeDistance n1, NodeDistance n2) -> {
+			if (n1.getDistance() > n2.getDistance()) {
+				return 1;
+			} else if (n1.getDistance() == n2.getDistance()) {
+				return 0;
+			} else {
+				return -1;
+			}
+		};
 	}
 }
