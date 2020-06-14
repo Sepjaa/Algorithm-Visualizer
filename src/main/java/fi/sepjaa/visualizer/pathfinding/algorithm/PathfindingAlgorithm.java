@@ -15,7 +15,7 @@ public interface PathfindingAlgorithm {
 	Type getType();
 
 	public enum Type {
-		DIJKSTRA("Dijkstra");
+		DIJKSTRA("Dijkstra"), A_STAR("A-star");
 
 		private String value;
 

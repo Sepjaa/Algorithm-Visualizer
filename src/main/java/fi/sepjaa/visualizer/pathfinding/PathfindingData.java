@@ -115,12 +115,14 @@ public class PathfindingData {
 	}
 
 	public void setMeasurementSleep(int amount) {
+		LOG.info("Updating measurement sleep to {}", amount);
 		synchronized (lock) {
 			this.measurementSleep = amount;
 		}
 	}
 
 	public void setEvaluationSleep(int amount) {
+		LOG.info("Updating evaluation sleep to {}", amount);
 		synchronized (lock) {
 			this.evaluationSleep = amount;
 		}

@@ -24,8 +24,8 @@ import fi.sepjaa.visualizer.common.CommonConstants;
  */
 public class NodeUtilities {
 	public static final Logger LOG = LoggerFactory.getLogger(NodeUtilities.class);
-	private static final float ACCEPTABLE_LOWER_THAN_AVERAGE_FACTOR = 0.65f;
-	private static final int ACCEPTABLE_SEARCH_ITERATIONS = 100;
+	private static final float ACCEPTABLE_LOWER_THAN_AVERAGE_FACTOR = 0.80f;
+	private static final int ACCEPTABLE_SEARCH_ITERATIONS = 500;
 	public static final int INT_FLOAT_COMPARATOR_ACCURACY = 10000;
 
 	public static ImmutableMap<Integer, Node> spawnNodes(int nodeCount, int connectionsCount) {

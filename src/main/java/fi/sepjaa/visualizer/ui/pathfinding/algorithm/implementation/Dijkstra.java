@@ -36,7 +36,7 @@ public class Dijkstra extends AbstractPathfindingAlgorithm {
 			if (Thread.currentThread().isInterrupted()) {
 				break;
 			}
-			evaluated = evaluate(data, current.get(), nodes, distances);
+			evaluated = evaluate(data, copy, current.get(), distances);
 			current = getNext(distances, evaluated);
 			if (current.isPresent() && current.get() == end) {
 				LOG.debug("Reached end node as current with distance {}", distances.get(end));
@@ -69,25 +69,33 @@ public class Dijkstra extends AbstractPathfindingAlgorithm {
 		return distances;
 	}
 
-	private List<Integer> evaluate(PathfindingData data, int nodeId, ImmutableMap<Integer, Node> nodes,
+	private List<Integer> evaluate(PathfindingData data, ImmutablePathfindingData copy, int nodeId,
 			Map<Integer, NodeDistance> distances) {
 		List<Integer> evaluatedNodes = data.addAndReturnEvaluated(nodeId, distances);
+		ImmutableMap<Integer, Node> nodes = copy.getNodes();
 		Node node = nodes.get(nodeId);
-		float nodeDistance = distances.get(nodeId).getDistance();
 		for (Integer neighbourId : node.getConnections()) {
 			if (!evaluatedNodes.contains(neighbourId) && !Thread.currentThread().isInterrupted()) {
-				Node neighbour = nodes.get(neighbourId);
-				ConnectedNodePair pair = new ConnectedNodePair(node, neighbour);
-				float distance = nodeDistance + data.measure(pair);
-				NodeDistance current = distances.get(neighbour.getId());
+				float distance = evaluateNeighbour(data, copy, nodeId, neighbourId, distances);
+				NodeDistance current = distances.get(neighbourId);
 				if (distance < current.getDistance()) {
 					NodeDistance neww = new NodeDistance(neighbourId, nodeId, distance);
-					LOG.debug("Updated distance for node {} to {}", neighbour, neww);
+					LOG.debug("Updated distance for node id {} to {}", neighbourId, neww);
 					distances.put(neighbourId, neww);
 				}
 			}
 		}
 		return evaluatedNodes;
+	}
+
+	protected float evaluateNeighbour(PathfindingData data, ImmutablePathfindingData copy, int nodeId, int neighbourId,
+			Map<Integer, NodeDistance> distances) {
+		ImmutableMap<Integer, Node> nodes = copy.getNodes();
+		Node evaluatednode = nodes.get(nodeId);
+		Node neighbour = nodes.get(neighbourId);
+		float nodeDistance = distances.get(nodeId).getDistance();
+		ConnectedNodePair pair = new ConnectedNodePair(evaluatednode, neighbour);
+		return nodeDistance + data.measure(pair);
 	}
 
 	@Override

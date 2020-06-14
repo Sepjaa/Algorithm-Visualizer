@@ -54,12 +54,14 @@ public class SortingData {
 	}
 
 	public void setSwapSleep(int swapSleep) {
+		LOG.info("Updating swap sleep to {}", swapSleep);
 		synchronized (lock) {
 			this.swapSleep = swapSleep;
 		}
 	}
 
 	public void setCompareSleep(int compareSleep) {
+		LOG.info("Updating compare sleep to {}", compareSleep);
 		synchronized (lock) {
 			this.compareSleep = compareSleep;
 		}

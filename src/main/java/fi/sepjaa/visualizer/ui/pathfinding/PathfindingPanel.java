@@ -38,12 +38,11 @@ public class PathfindingPanel extends AlgorithmPanel implements PathfindingNodeS
 
 	private final NodeSelectionUpdateDispatcher dispatcher;
 
-	private final JTextField nodes, connections;
+	private final JTextField nodes, connections, measurementSleep, evaluationSleep;
 	private final JComboBox<Type> algorithmSelection;
 
 	private final ImmutableMap<Type, PathfindingAlgorithm> algorithms;
 	private final ImmutableList<PathfindingDataAware> dataListeners;
-	private final JTextField measurementSleep, evaluationSleep;
 	private PathfindingData data;
 
 	@Autowired
@@ -177,8 +176,13 @@ public class PathfindingPanel extends AlgorithmPanel implements PathfindingNodeS
 		return () -> {
 			LOG.info("Starting to run pathfind");
 			getAlgorithm().find(data);
-			data.clearMidFindInfo();
 		};
+	}
+
+	@Override
+	public void onEnd(boolean canceled) {
+		data.clearMidFindInfo();
+		super.onEnd(canceled);
 	}
 
 	@Override
