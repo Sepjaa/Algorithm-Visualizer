@@ -32,7 +32,6 @@ import fi.sepjaa.visualizer.ui.common.UiConstants;
 public class PathfindingVisualizer extends GLCanvasVisualizer implements PathfindingDataListener {
 
 	private static final Logger LOG = LoggerFactory.getLogger(PathfindingVisualizer.class);
-	private float ratio = 1;
 	private final ImmutableList<PathfindingVisualizerMouseListener> mouseListeners;
 	private final ImmutableList<PathfindingVisualizerSizeListener> sizeListeners;
 
@@ -74,18 +73,8 @@ public class PathfindingVisualizer extends GLCanvasVisualizer implements Pathfin
 
 	@Override
 	public void reshape(GLAutoDrawable drawable, int x, int y, int width, int height) {
-		GL2 gl = drawable.getGL().getGL2();
-
-		if (height == 0) {
-			height = 1;
-		}
-		// lambda effectively final blaa..
-		final int finalHeight = height;
-
-		this.sizeListeners.forEach(sizeListener -> sizeListener.sizeUpdated(width, finalHeight));
-
-		gl.glViewport(x, y, width, height);
-		this.ratio = (float) width / height;
+		super.reshape(drawable, x, y, width, height);
+		this.sizeListeners.forEach(sizeListener -> sizeListener.sizeUpdated(width, height));
 	}
 
 	@Override
@@ -107,7 +96,8 @@ public class PathfindingVisualizer extends GLCanvasVisualizer implements Pathfin
 		gl.glClear(GL_COLOR_BUFFER_BIT);
 		gl.glLoadIdentity();
 
-		gl.glTranslatef(-1f, -1f, 0f); // translate so (0,0) is in the left bottom corner and (2,2) in right top corner
+		gl.glTranslatef(-1f, -1f, 0f); // translate so (0,0) is in the left bottom
+		// corner and (2,2) in right top corner
 		gl.glColor3f(0f, 0f, 0f);
 
 		for (Node it : nodes.values()) {
@@ -155,24 +145,24 @@ public class PathfindingVisualizer extends GLCanvasVisualizer implements Pathfin
 			gl.glColor3f(0f, 0f, 0f);
 		}
 		// TODO: ratio/viewport fixes?
-		if (ratio > 1) {
-			gl.glVertex2f(x1 + perpendicular[0] * UiConstants.NODE_CONNECTION_WIDTH / ratio,
+		if (getRatio() > 1) {
+			gl.glVertex2f(x1 + perpendicular[0] * UiConstants.NODE_CONNECTION_WIDTH / getRatio(),
 					y1 + perpendicular[1] * UiConstants.NODE_CONNECTION_WIDTH);
-			gl.glVertex2f(x1 - perpendicular[0] * UiConstants.NODE_CONNECTION_WIDTH / ratio,
+			gl.glVertex2f(x1 - perpendicular[0] * UiConstants.NODE_CONNECTION_WIDTH / getRatio(),
 					y1 - perpendicular[1] * UiConstants.NODE_CONNECTION_WIDTH);
-			gl.glVertex2f(x1 + vectorised[0] - perpendicular[0] * UiConstants.NODE_CONNECTION_WIDTH / ratio,
+			gl.glVertex2f(x1 + vectorised[0] - perpendicular[0] * UiConstants.NODE_CONNECTION_WIDTH / getRatio(),
 					y1 + vectorised[1] - perpendicular[1] * UiConstants.NODE_CONNECTION_WIDTH);
-			gl.glVertex2f(x1 + vectorised[0] + perpendicular[0] * UiConstants.NODE_CONNECTION_WIDTH / ratio,
+			gl.glVertex2f(x1 + vectorised[0] + perpendicular[0] * UiConstants.NODE_CONNECTION_WIDTH / getRatio(),
 					y1 + vectorised[1] + perpendicular[1] * UiConstants.NODE_CONNECTION_WIDTH);
 		} else {
 			gl.glVertex2f(x1 + perpendicular[0] * UiConstants.NODE_CONNECTION_WIDTH,
-					y1 + perpendicular[1] * UiConstants.NODE_CONNECTION_WIDTH * ratio);
+					y1 + perpendicular[1] * UiConstants.NODE_CONNECTION_WIDTH * getRatio());
 			gl.glVertex2f(x1 - perpendicular[0] * UiConstants.NODE_CONNECTION_WIDTH,
-					y1 - perpendicular[1] * UiConstants.NODE_CONNECTION_WIDTH * ratio);
+					y1 - perpendicular[1] * UiConstants.NODE_CONNECTION_WIDTH * getRatio());
 			gl.glVertex2f(x1 + vectorised[0] - perpendicular[0] * UiConstants.NODE_CONNECTION_WIDTH,
-					y1 + vectorised[1] - perpendicular[1] * UiConstants.NODE_CONNECTION_WIDTH * ratio);
+					y1 + vectorised[1] - perpendicular[1] * UiConstants.NODE_CONNECTION_WIDTH * getRatio());
 			gl.glVertex2f(x1 + vectorised[0] + perpendicular[0] * UiConstants.NODE_CONNECTION_WIDTH,
-					y1 + vectorised[1] + perpendicular[1] * UiConstants.NODE_CONNECTION_WIDTH * ratio);
+					y1 + vectorised[1] + perpendicular[1] * UiConstants.NODE_CONNECTION_WIDTH * getRatio());
 		}
 		gl.glPopMatrix();
 		gl.glEnd();
@@ -196,12 +186,12 @@ public class PathfindingVisualizer extends GLCanvasVisualizer implements Pathfin
 		for (int i = 0; i < UiConstants.NODE_DRAW_SEGMENTS + 1; i++) {
 			float angle = 2f * (float) Math.PI * (float) i / (float) UiConstants.NODE_DRAW_SEGMENTS;
 			// TODO: ratio/viewport fixes?
-			if (ratio > 1) {
-				gl.glVertex2f(x + UiConstants.NODE_RADIUS * (float) Math.cos(angle) / ratio,
+			if (getRatio() > 1) {
+				gl.glVertex2f(x + UiConstants.NODE_RADIUS * (float) Math.cos(angle) / getRatio(),
 						y + UiConstants.NODE_RADIUS * (float) Math.sin(angle));
 			} else {
 				gl.glVertex2f(x + UiConstants.NODE_RADIUS * (float) Math.cos(angle),
-						y + UiConstants.NODE_RADIUS * (float) Math.sin(angle) * ratio);
+						y + UiConstants.NODE_RADIUS * (float) Math.sin(angle) * getRatio());
 			}
 		}
 		gl.glEnd();

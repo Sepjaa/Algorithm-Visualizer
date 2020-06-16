@@ -18,7 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
 import com.google.common.collect.ImmutableList;
 
@@ -31,7 +31,7 @@ import net.miginfocom.swing.MigLayout;
  *
  */
 @SuppressWarnings("serial")
-@Service
+@Component
 public class MainWindow extends JFrame implements ApplicationContextAware {
 	private static final Logger LOG = LoggerFactory.getLogger(MainWindow.class);
 	private final ImmutableList<AlgorithmPanel> panels;

@@ -68,7 +68,7 @@ public class UiConstants {
 			public void mousePressed(MouseEvent e) {
 				SwingUtilities.invokeLater(() -> {
 					JFormattedTextField ftf = (JFormattedTextField) e.getSource();
-					int offset = ftf.viewToModel(e.getPoint());
+					int offset = ftf.viewToModel2D(e.getPoint());
 					ftf.setCaretPosition(offset);
 				});
 			}

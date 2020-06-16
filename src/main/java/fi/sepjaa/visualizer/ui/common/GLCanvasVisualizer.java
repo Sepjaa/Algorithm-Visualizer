@@ -2,6 +2,9 @@ package fi.sepjaa.visualizer.ui.common;
 
 import java.awt.Component;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GLAutoDrawable;
 import com.jogamp.opengl.GLEventListener;
@@ -9,6 +12,9 @@ import com.jogamp.opengl.awt.GLCanvas;
 
 @SuppressWarnings("serial")
 public abstract class GLCanvasVisualizer extends GLCanvas implements GLEventListener, AlgorithmVisualizer {
+	private final Logger LOG = LoggerFactory.getLogger(getClass());
+
+	private float ratio = 1;
 
 	public GLCanvasVisualizer() {
 		super(CapabilitiesProvider.instance());
@@ -29,8 +35,19 @@ public abstract class GLCanvasVisualizer extends GLCanvas implements GLEventList
 
 	@Override
 	public void reshape(GLAutoDrawable drawable, int x, int y, int width, int height) {
-		GL2 gl = drawable.getGL().getGL2(); // get the OpenGL 2 graphics context
-		gl.glViewport(0, 0, width, height);
+		GL2 gl = drawable.getGL().getGL2();
+		if (height == 0) {
+			height = 1;
+		}
+		// After Java update from 7 -> 11, glViewport actual size is somehow 0.8 of the
+		// original
+		gl.glViewport(x, y, (int) (width * 1.25f), (int) ((height * 1.25f)));
+		this.ratio = (float) width / height;
+		LOG.info("Reshaped to width {},height {}, ratio {}", width, height, this.ratio);
+	}
+
+	public float getRatio() {
+		return ratio;
 	}
 
 	@Override

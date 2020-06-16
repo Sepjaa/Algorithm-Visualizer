@@ -1,11 +1,13 @@
 package fi.sepjaa.visualizer.common;
 
+import java.lang.Thread.UncaughtExceptionHandler;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PreDestroy;
@@ -25,9 +27,8 @@ import org.springframework.stereotype.Component;
 @Component
 public class AlgorithmExecutor implements AlgorithmExecutionEventDispatcher {
 	private static final Logger LOG = LoggerFactory.getLogger(AlgorithmExecutor.class);
-
-	private final ExecutorService executor = Executors
-			.newSingleThreadExecutor(r -> new Thread(r, "AlgorithmExecutorThread"));
+	private static final String ALGORITHM_EXECUTOR_THREAD_NAME = "AlgorithmExecutorThread";
+	private final ExecutorService executor = Executors.newSingleThreadExecutor(new AlgorithmThreadFactory());
 
 	private final List<AlgorithmExecutionListener> listeners = new CopyOnWriteArrayList<>();
 
@@ -103,6 +104,22 @@ public class AlgorithmExecutor implements AlgorithmExecutionEventDispatcher {
 	public void removeListener(AlgorithmExecutionListener listener) {
 		if (!listeners.remove(listener)) {
 			LOG.warn("Tried to remove listener {} from listeners but it was not registered to {}", listener, listeners);
+		}
+	}
+
+	private class AlgorithmThreadFactory implements ThreadFactory {
+		@Override
+		public Thread newThread(Runnable r) {
+			LOG.info("Constructing new thread");
+			Thread thread = new Thread(r, ALGORITHM_EXECUTOR_THREAD_NAME);
+			thread.setUncaughtExceptionHandler(new UncaughtExceptionHandler() {
+				@Override
+				public void uncaughtException(Thread t, Throwable e) {
+					LOG.error("****************************************************\nThread {} uncaught exception.", t,
+							e);
+				}
+			});
+			return thread;
 		}
 	}
 }
