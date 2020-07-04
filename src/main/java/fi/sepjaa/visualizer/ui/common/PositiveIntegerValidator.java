@@ -4,7 +4,6 @@ import java.awt.Color;
 import java.text.Format;
 import java.text.ParseException;
 import java.util.function.Consumer;
-import java.util.regex.Pattern;
 
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
@@ -23,7 +22,7 @@ import org.slf4j.LoggerFactory;
  *
  */
 public class PositiveIntegerValidator implements DocumentListener {
-	private static final Logger LOG = LoggerFactory.getLogger(PositiveIntegerVerifier.class);
+	private static final Logger LOG = LoggerFactory.getLogger(PositiveIntegerValidator.class);
 	private final JTextComponent field;
 	private final Format format;
 	private final Consumer<Long> onChange;
@@ -76,8 +75,12 @@ public class PositiveIntegerValidator implements DocumentListener {
 	}
 
 	private boolean containsIllegalCharacters(String text) {
-		LOG.debug("Text {} matches {}", text, !Pattern.matches("[0-9]", text));
-		return !Pattern.matches("[0-9,.]+", text);
+		try {
+			this.format.parseObject(text);
+			return false;
+		} catch (ParseException e) {
+			return true;
+		}
 	}
 
 	private void validationError() {
