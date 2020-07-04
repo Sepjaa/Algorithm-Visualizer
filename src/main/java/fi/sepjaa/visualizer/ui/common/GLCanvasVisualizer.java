@@ -39,9 +39,8 @@ public abstract class GLCanvasVisualizer extends GLCanvas implements GLEventList
 		if (height == 0) {
 			height = 1;
 		}
-		// After Java update from 7 -> 11, glViewport actual size is somehow 0.8 of the
-		// original
-		gl.glViewport(x, y, (int) (width * 1.25f), (int) ((height * 1.25f)));
+		// -Dsun.java2d.uiScale=1 because display scaling messes up the openGL area.
+		gl.glViewport(x, y, width, height);
 		this.ratio = (float) width / height;
 		LOG.info("Reshaped to width {},height {}, ratio {}", width, height, this.ratio);
 	}
