@@ -23,6 +23,7 @@ import com.jogamp.opengl.GLAutoDrawable;
 import fi.sepjaa.visualizer.pathfinding.ConnectedNodePair;
 import fi.sepjaa.visualizer.pathfinding.ImmutablePathfindingData;
 import fi.sepjaa.visualizer.pathfinding.Node;
+import fi.sepjaa.visualizer.pathfinding.NodeUtilities;
 import fi.sepjaa.visualizer.pathfinding.PathfindingData;
 import fi.sepjaa.visualizer.ui.common.GLCanvasVisualizer;
 import fi.sepjaa.visualizer.ui.common.UiConstants;
@@ -106,12 +107,13 @@ public class PathfindingVisualizer extends GLCanvasVisualizer implements Pathfin
 				drawLine(gl, 2 * it.getX(), 2 * connectionTarget.getX(), 2 * it.getY(), 2 * connectionTarget.getY(),
 						measurement.isPresent() && (measurement.get().is(it.getId(), connectionId)),
 						path.contains(it.getId()) && path.contains(connectionId),
-						evaluated.contains(it.getId()) && evaluated.contains(connectionId));
+						evaluated.contains(it.getId()) && evaluated.contains(connectionId),
+						copy.getNodes().keySet().size());
 			});
 		}
 		for (Node it : nodes.values()) {
 			drawNode(gl, it.getX() * 2, it.getY() * 2, it.getId() == copy.getStart(), it.getId() == copy.getEnd(),
-					path.contains(it.getId()), evaluated.contains(it.getId()));
+					path.contains(it.getId()), evaluated.contains(it.getId()), copy.getNodes().keySet().size());
 		}
 	}
 
@@ -119,7 +121,7 @@ public class PathfindingVisualizer extends GLCanvasVisualizer implements Pathfin
 	 * Open GL default lines suck so draw connections as a rectangle.
 	 */
 	private void drawLine(GL2 gl, float x1, float x2, float y1, float y2, boolean measured, boolean onPath,
-			boolean evaluated) {
+			boolean evaluated, int nodesAmount) {
 		float dx = x2 - x1;
 		float dy = y2 - y1;
 		float[] vectorised = new float[2];
@@ -146,23 +148,23 @@ public class PathfindingVisualizer extends GLCanvasVisualizer implements Pathfin
 		}
 		// TODO: ratio/viewport fixes?
 		if (getRatio() > 1) {
-			gl.glVertex2f(x1 + perpendicular[0] * UiConstants.NODE_CONNECTION_WIDTH / getRatio(),
-					y1 + perpendicular[1] * UiConstants.NODE_CONNECTION_WIDTH);
-			gl.glVertex2f(x1 - perpendicular[0] * UiConstants.NODE_CONNECTION_WIDTH / getRatio(),
-					y1 - perpendicular[1] * UiConstants.NODE_CONNECTION_WIDTH);
-			gl.glVertex2f(x1 + vectorised[0] - perpendicular[0] * UiConstants.NODE_CONNECTION_WIDTH / getRatio(),
-					y1 + vectorised[1] - perpendicular[1] * UiConstants.NODE_CONNECTION_WIDTH);
-			gl.glVertex2f(x1 + vectorised[0] + perpendicular[0] * UiConstants.NODE_CONNECTION_WIDTH / getRatio(),
-					y1 + vectorised[1] + perpendicular[1] * UiConstants.NODE_CONNECTION_WIDTH);
+			gl.glVertex2f(x1 + perpendicular[0] * getNodeConnectionWidth(nodesAmount) / getRatio(),
+					y1 + perpendicular[1] * getNodeConnectionWidth(nodesAmount));
+			gl.glVertex2f(x1 - perpendicular[0] * getNodeConnectionWidth(nodesAmount) / getRatio(),
+					y1 - perpendicular[1] * getNodeConnectionWidth(nodesAmount));
+			gl.glVertex2f(x1 + vectorised[0] - perpendicular[0] * getNodeConnectionWidth(nodesAmount) / getRatio(),
+					y1 + vectorised[1] - perpendicular[1] * getNodeConnectionWidth(nodesAmount));
+			gl.glVertex2f(x1 + vectorised[0] + perpendicular[0] * getNodeConnectionWidth(nodesAmount) / getRatio(),
+					y1 + vectorised[1] + perpendicular[1] * getNodeConnectionWidth(nodesAmount));
 		} else {
-			gl.glVertex2f(x1 + perpendicular[0] * UiConstants.NODE_CONNECTION_WIDTH,
-					y1 + perpendicular[1] * UiConstants.NODE_CONNECTION_WIDTH * getRatio());
-			gl.glVertex2f(x1 - perpendicular[0] * UiConstants.NODE_CONNECTION_WIDTH,
-					y1 - perpendicular[1] * UiConstants.NODE_CONNECTION_WIDTH * getRatio());
-			gl.glVertex2f(x1 + vectorised[0] - perpendicular[0] * UiConstants.NODE_CONNECTION_WIDTH,
-					y1 + vectorised[1] - perpendicular[1] * UiConstants.NODE_CONNECTION_WIDTH * getRatio());
-			gl.glVertex2f(x1 + vectorised[0] + perpendicular[0] * UiConstants.NODE_CONNECTION_WIDTH,
-					y1 + vectorised[1] + perpendicular[1] * UiConstants.NODE_CONNECTION_WIDTH * getRatio());
+			gl.glVertex2f(x1 + perpendicular[0] * getNodeConnectionWidth(nodesAmount),
+					y1 + perpendicular[1] * getNodeConnectionWidth(nodesAmount) * getRatio());
+			gl.glVertex2f(x1 - perpendicular[0] * getNodeConnectionWidth(nodesAmount),
+					y1 - perpendicular[1] * getNodeConnectionWidth(nodesAmount) * getRatio());
+			gl.glVertex2f(x1 + vectorised[0] - perpendicular[0] * getNodeConnectionWidth(nodesAmount),
+					y1 + vectorised[1] - perpendicular[1] * getNodeConnectionWidth(nodesAmount) * getRatio());
+			gl.glVertex2f(x1 + vectorised[0] + perpendicular[0] * getNodeConnectionWidth(nodesAmount),
+					y1 + vectorised[1] + perpendicular[1] * getNodeConnectionWidth(nodesAmount) * getRatio());
 		}
 		gl.glPopMatrix();
 		gl.glEnd();
@@ -171,7 +173,8 @@ public class PathfindingVisualizer extends GLCanvasVisualizer implements Pathfin
 	/**
 	 * Open GL default points suck so draw nodes as a triangle fan forming a circle.
 	 */
-	private void drawNode(GL2 gl, float x, float y, boolean start, boolean end, boolean onPath, boolean evaluated) {
+	private void drawNode(GL2 gl, float x, float y, boolean start, boolean end, boolean onPath, boolean evaluated,
+			int nodesAmount) {
 		gl.glBegin(GL_TRIANGLE_FAN);
 		if (onPath) {
 			gl.glColor3f(0f, 1f, 0f);
@@ -187,14 +190,22 @@ public class PathfindingVisualizer extends GLCanvasVisualizer implements Pathfin
 			float angle = 2f * (float) Math.PI * (float) i / (float) UiConstants.NODE_DRAW_SEGMENTS;
 			// TODO: ratio/viewport fixes?
 			if (getRatio() > 1) {
-				gl.glVertex2f(x + UiConstants.NODE_RADIUS * (float) Math.cos(angle) / getRatio(),
-						y + UiConstants.NODE_RADIUS * (float) Math.sin(angle));
+				gl.glVertex2f(x + getNodeRadius(nodesAmount) * (float) Math.cos(angle) / getRatio(),
+						y + getNodeRadius(nodesAmount) * (float) Math.sin(angle));
 			} else {
-				gl.glVertex2f(x + UiConstants.NODE_RADIUS * (float) Math.cos(angle),
-						y + UiConstants.NODE_RADIUS * (float) Math.sin(angle) * getRatio());
+				gl.glVertex2f(x + getNodeRadius(nodesAmount) * (float) Math.cos(angle),
+						y + getNodeRadius(nodesAmount) * (float) Math.sin(angle) * getRatio());
 			}
 		}
 		gl.glEnd();
+	}
+
+	private float getNodeConnectionWidth(int nodesAmount) {
+		return UiConstants.NODE_CONNECTION_WIDTH * NodeUtilities.scale(nodesAmount);
+	}
+
+	private float getNodeRadius(int nodesAmount) {
+		return UiConstants.NODE_RADIUS * NodeUtilities.scale(nodesAmount);
 	}
 
 }

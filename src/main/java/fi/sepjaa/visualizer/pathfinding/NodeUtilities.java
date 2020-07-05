@@ -120,4 +120,8 @@ public class NodeUtilities {
 			}
 		};
 	}
+
+	public static float scale(int nodesAmount) {
+		return (float) (40f / Math.sqrt(nodesAmount));
+	}
 }

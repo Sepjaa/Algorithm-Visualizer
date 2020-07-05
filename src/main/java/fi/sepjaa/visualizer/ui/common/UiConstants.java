@@ -25,9 +25,10 @@ public class UiConstants {
 
 	public static final int NODE_DRAW_SEGMENTS = 16;
 	public static final float NODE_RADIUS = 0.01f;
-	public static final float NODE_CONNECTION_WIDTH = 0.004f;
+	public static final float NODE_CONNECTION_WIDTH = 0.003f;
+	public static final float BASE_NODE_SCALING = 40;
+
 	public static final int AA_SAMPLES = 8;
-	public static final float SELECTION_THRESHOLD = 0.015f;
 
 	public static final String APPLICATION_TITLE = "Algorithm Visualizer";
 	public static final String SORTING_TAB_TITLE = "Sorting";

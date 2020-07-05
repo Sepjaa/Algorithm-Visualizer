@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import fi.sepjaa.visualizer.common.AlgorithmExecutor;
+import fi.sepjaa.visualizer.pathfinding.ImmutablePathfindingData;
 import fi.sepjaa.visualizer.pathfinding.Node;
 import fi.sepjaa.visualizer.pathfinding.NodeUtilities;
 import fi.sepjaa.visualizer.pathfinding.PathfindingData;
@@ -73,7 +74,7 @@ public class NodeSelectionManager implements PathfindingVisualizerMouseListener,
 		if (data != null) {
 			Optional<Node> nodeCloseEnough = NodeUtilities
 					.getClosestNode(glX, glY, this.data.getCopy().getNodes().values())
-					.filter(n -> new Node(-1, glX, glY).distanceTo(n) <= UiConstants.SELECTION_THRESHOLD);
+					.filter(n -> new Node(-1, glX, glY).distanceTo(n) <= getSelectionTolerance(this.data.getCopy()));
 			LOG.info("Node close enough {}", nodeCloseEnough);
 			if (nodeCloseEnough.isPresent()) {
 				this.data.setSelected(nodeCloseEnough.get().getId());
@@ -83,6 +84,14 @@ public class NodeSelectionManager implements PathfindingVisualizerMouseListener,
 				onSelectionChange();
 			}
 		}
+	}
+
+	public float getSelectionTolerance(ImmutablePathfindingData data) {
+		float result = UiConstants.NODE_RADIUS * NodeUtilities.scale(this.data.getCopy().getNodes().size());
+		if (result <= UiConstants.NODE_RADIUS * 2) {
+			result = 2 * UiConstants.NODE_RADIUS;
+		}
+		return result;
 	}
 
 	private synchronized void onSelectionChange() {

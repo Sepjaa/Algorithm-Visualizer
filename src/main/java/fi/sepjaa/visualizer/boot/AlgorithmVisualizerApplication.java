@@ -18,6 +18,7 @@ public class AlgorithmVisualizerApplication {
 	private static final Logger LOG = LoggerFactory.getLogger(AlgorithmVisualizerApplication.class);
 
 	public static void main(String[] args) {
+		System.setProperty("sun.java2d.uiScale", "1");
 		try {
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException
