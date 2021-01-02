@@ -111,9 +111,9 @@ public class NodeUtilities {
 
 	public static Comparator<NodeDistance> getNodeDistanceComparator() {
 		return (NodeDistance n1, NodeDistance n2) -> {
-			if (n1.getDistance() > n2.getDistance()) {
+			if (n1.getTotalDistance() > n2.getTotalDistance()) {
 				return 1;
-			} else if (n1.getDistance() == n2.getDistance()) {
+			} else if (n1.getTotalDistance() == n2.getTotalDistance()) {
 				return 0;
 			} else {
 				return -1;

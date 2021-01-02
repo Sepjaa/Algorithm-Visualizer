@@ -88,9 +88,10 @@ public class NodeSelectionManager implements PathfindingVisualizerMouseListener,
 
 	public float getSelectionTolerance(ImmutablePathfindingData data) {
 		float result = UiConstants.NODE_RADIUS * NodeUtilities.scale(this.data.getCopy().getNodes().size());
-		if (result <= UiConstants.NODE_RADIUS * 2) {
-			result = 2 * UiConstants.NODE_RADIUS;
+		if (result <= UiConstants.NODE_RADIUS) {
+			result = UiConstants.NODE_RADIUS;
 		}
+		LOG.info("Selection tolerance {}", result);
 		return result;
 	}
 

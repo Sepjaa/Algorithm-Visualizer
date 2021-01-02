@@ -3,6 +3,8 @@ package fi.sepjaa.visualizer.ui.pathfinding;
 import static com.jogamp.opengl.GL.GL_COLOR_BUFFER_BIT;
 import static com.jogamp.opengl.GL.GL_TRIANGLE_FAN;
 
+import java.awt.Color;
+import java.awt.Font;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -19,6 +21,7 @@ import com.google.common.collect.ImmutableList;
 import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GL2ES3;
 import com.jogamp.opengl.GLAutoDrawable;
+import com.jogamp.opengl.util.awt.TextRenderer;
 
 import fi.sepjaa.visualizer.pathfinding.ConnectedNodePair;
 import fi.sepjaa.visualizer.pathfinding.ImmutablePathfindingData;
@@ -35,6 +38,8 @@ public class PathfindingVisualizer extends GLCanvasVisualizer implements Pathfin
 	private static final Logger LOG = LoggerFactory.getLogger(PathfindingVisualizer.class);
 	private final ImmutableList<PathfindingVisualizerMouseListener> mouseListeners;
 	private final ImmutableList<PathfindingVisualizerSizeListener> sizeListeners;
+
+	private final TextRenderer renderer = new TextRenderer(new Font("SansSerif", Font.BOLD, 18));
 
 	private final Object lock = new Object();
 	@GuardedBy("lock")
@@ -112,8 +117,9 @@ public class PathfindingVisualizer extends GLCanvasVisualizer implements Pathfin
 			});
 		}
 		for (Node it : nodes.values()) {
-			drawNode(gl, it.getX() * 2, it.getY() * 2, it.getId() == copy.getStart(), it.getId() == copy.getEnd(),
-					path.contains(it.getId()), evaluated.contains(it.getId()), copy.getNodes().keySet().size());
+			drawNode(gl, String.valueOf(it.getId()), it.getX() * 2, it.getY() * 2, it.getId() == copy.getStart(),
+					it.getId() == copy.getEnd(), path.contains(it.getId()), evaluated.contains(it.getId()),
+					copy.getNodes().keySet().size());
 		}
 	}
 
@@ -173,8 +179,8 @@ public class PathfindingVisualizer extends GLCanvasVisualizer implements Pathfin
 	/**
 	 * Open GL default points suck so draw nodes as a triangle fan forming a circle.
 	 */
-	private void drawNode(GL2 gl, float x, float y, boolean start, boolean end, boolean onPath, boolean evaluated,
-			int nodesAmount) {
+	private void drawNode(GL2 gl, String text, float x, float y, boolean start, boolean end, boolean onPath,
+			boolean evaluated, int nodesAmount) {
 		gl.glBegin(GL_TRIANGLE_FAN);
 		if (onPath) {
 			gl.glColor3f(0f, 1f, 0f);
@@ -198,6 +204,20 @@ public class PathfindingVisualizer extends GLCanvasVisualizer implements Pathfin
 			}
 		}
 		gl.glEnd();
+		if (isDebug()) {
+			renderer.beginRendering(getWidth(), getHeight());
+			renderer.setColor(Color.GRAY);
+			int xPos = (int) (x * getWidth()) / 2;
+			int yPos = (int) (y * getHeight()) / 2;
+			renderer.draw(text, xPos, yPos);
+			renderer.endRendering();
+		}
+	}
+
+	// TODO: proper method to check if debug mode?
+	private static boolean isDebug() {
+		return java.lang.management.ManagementFactory.getRuntimeMXBean().getInputArguments().toString()
+				.indexOf("jdwp") >= 0;
 	}
 
 	private float getNodeConnectionWidth(int nodesAmount) {
